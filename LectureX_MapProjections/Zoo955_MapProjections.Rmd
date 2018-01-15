@@ -105,17 +105,17 @@ Projections can be classified by surface or property
 
 
 # Cylindrical Map Projections
-Cylindrical mpas have straight coordinate lines
+Cylindrical maps have straight coordinate lines
 
 - The horizontal parallels cross the vertical meridians at right angles
-- Different cyclindrical map projections have different scales in spacing the parallel lines
+- Different cylindrical map projections have different scales in spacing the parallel lines
 - Popular examples are: Mercator, Behrmann, Gall-Peters
 
 ![*Figure: Mercator Projection. The mercator projection procedure is often described as wrapping a piece of paper vertically around a globe and unfolding it*](Figs/map_mercator.png)
 
-- The specializations of the cylindric equal-area projection are different only in the ratio of the vertical to horizontal axis
+- The specializations of the cylindrical equal-area projection are different only in the ratio of the vertical to horizontal axis
 - This ratio determines the **standard parallel**, which is the parallel at which there is no distortion and along which distances match the stated scale. 
-- There are always two standard parallels on the cylindric equal-area projection, each at the same distance north and south of the equator. 
+- There are always two standard parallels on the cylindrical equal-area projection, each at the same distance north and south of the equator. 
     + The standard parallels of the Gall–Peters are 45° N and 45° S. 
 
 Example: Cylindrical equal-area (Gall-Peters)
@@ -221,7 +221,7 @@ map('world', projection = 'orthographic',orientation = c(-90,0,0),fill=T,
 ```
 
 # Tissot's indicatrix
-A convienent way to illustrator disortion is by using Tissot's indicatrix. 
+A convenient way to illustrator distortion is by using Tissot's indicatrix. 
 
 *"A single indicatrix describes the distortion at a single point. Because distortion varies across a map, generally Tissot's indicatrices are placed across a map to illustrate the spatial change in distortion. A common scheme places them at each intersection of displayed meridians and parallels. These schematics are important in the study of map projections, both to illustrate distortion and to provide the basis for the calculations that represent the magnitude of distortion precisely at each point."* - Wikipedia entry
 

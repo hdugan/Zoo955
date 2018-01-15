@@ -9,25 +9,132 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## What are projections? 
+## Packages
+`sp` and `rgdal` will be the most common packages referenced here:
 
+`library(rgdal)`
+gdal = Geospatial Data Abstraction Library
 
-## R Markdown
+`library(sp)`
+sp = spatial 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## CRS 
+CRS = Coordinate Reference Systems
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+- In R, the notation used to describe the CRS is proj4string
+from the PROJ.4 library.
+- Example:`+init=epsg:4121 +proj=longlat +ellps=GRS80
++datum=GGRS87 +no_defs +towgs84=-199.87,74.79,246.62`
 
-```{r cars}
-summary(cars)
+- The CRS is a standardized way of indicating the projection, datum, and ellipsoid of data
+- A particular CRS can be referenced by its EPSG code (i.e.,
+epsg:4121). The EPSG is a structured dataset of CRS and
+Coordinate Transformations. 
+- See http://spatialreference.org/ 
+
+## Projection, datum, and ellipsoid
+**Ellipse**: Describes the generalized shape of the Earth. All mapping and coordinate systems begin with this description.
+**Datum**: Defines origin and orientation of the coordinate axes. Where to anchor the 'abstact' coordinates of the Earth. 
+
+- All datums specify the ellipsoid. But a given ellipsoid can be used by many datums. 
+- Common datums: WGS84, NAD83, NAD27
+- Common ellipses: WGS84, GRS80, clrk66
+- Available datums in rgdal package: `projInfo(type = "datum")`
+
+**Projection**: The method (or not) for mapping the globe onto a 2D surface
+
+- Two options: 
+    + Unprojected: Geographic referencing on the ellipse (lat/long)
+    + Projected: Easting/northing given on 2D plane 
+- Available projections in rgdal package: `projInfo(type = "proj")`
+
+# Common EPSG codes
+*credit: [NCEAS Overview of Coordinate Reference Systems (CRS) in R](https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/OverviewCoordinateReferenceSystems.pdf)*
+
+**Latitude/Longitude**
+
+WGS84 (EPSG: 4326)
+
+- +init=epsg:4326 +proj=longlat +ellps=WGS84+datum=WGS84 +no_defs +towgs84=0,0,0
+- CRS used by Google Earth and the U.S. Department of Defense for all their mapping. Tends to be used for global reference systems. GPS satellites broadcast the predicted WGS84 orbits.
+
+NAD83 (EPSG:4269)
+
+- +init=epsg:4269 +proj=longlat +ellps=GRS80 +datum=NAD83
++no_defs +towgs84=0,0,0
+- Most commonly used by U.S. federal agencies. Aligned with WGS84 at creation, but has since drifted. Although WGS84 and NAD83 are not equivalent, for most applications they are considered equivalent.
+
+NAD27 (EPSG: 4267)
+
+- +init=epsg:4267 +proj=longlat +ellps=clrk66 +datum=NAD27 +no_defs +nadgrids=@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat
+- Has been replaced by NAD83, but is still encountered!
+- Almost identical in Wisconsin
+
+**Projected (Easting/Northing)**
+
+UTM, Zone 10 (EPSG: 32610)
+
+- Zone 10 is used in the Pacific Northwest
+
+Mercator (EPSG: 3857)
+
+- Tiles from Google Maps, Open Street Maps, Stamen
+Maps
+
+## Reading shapefiles
+There are a handful of ways to read/write shapefiles in R. I prefer the `rgdal` package.
+
+Using the rgdal package, we are interested in the functions that read OGR data
+
+*Interesting fact: OGR used to stand for OpenGIS Simple Features Reference Implementation. However, since OGR is not fully compliant with the OpenGIS Simple Feature specification and is not approved as a reference implementation of the spec the name was changed to OGR Simple Features Library. The only meaning of OGR in this name is historical. OGR is also the prefix used everywhere in the source of the library for class names, filenames, etc.* (https://gis.stackexchange.com/questions/216003/what-does-ogr-stand-for)
+
+To read OGR data:
+```{r check shapefile info, message = F}
+library(rgdal)
+ogrInfo(dsn = 'Data/LakeMendota.shp',layer = 'LakeMendota')
+```
+We can see that the shapefile for Lake Mendota is currently not projected. It has lat/long coordinates with NAD83 datum and GRS80 ellipse
+
+To load shapefile:
+```{r read mendota shapefile, message = F,fig.height = 4, fig.align='left'}
+library(rgdal)
+mendota = readOGR(dsn = 'Data/LakeMendota.shp',layer = 'LakeMendota')
+plot(mendota, col='navy')
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+# Transform CRS
+Let's transform the CRS from NAD83 to WGS84:
+```{r transform Mendota crs}
+mendota_WGS84 <- spTransform(mendota, CRS("+init=epsg:4326")) #shorter method using EPSG codes (however, I always forget how to format these)
+mendota_WGS84 <- spTransform(mendota, CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")) #longer method, but sometimes easier
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Let's check if we were successful in transforming the CRS of the shapefile. I actually prefer `crs` in the `raster` package to `CRS` in the `rgdal` package. 
+```{r checking crs, message = F}
+library(raster)
+crs(mendota_WGS84)
+crs(mendota)
+```
+*If you plot these both, you can't tell the difference in the datum. This is because NAD83 is centered over the middle of the North American plate, so drift is minimal in Wisconsin*
+
+How can we see if there is a difference? We can extract the x,y coordinates for two polygons. Shapefiles have a cryptic nested slot layout, but coordinates can be extracted from our polygon by:
+`mendota@polygons[[1]]@Polygons[[1]]@coords`
+
+If we subtract the two, we may see a difference. Most of the points are exactly the same. A few are e-15 off. 
+```{r subtracting coordinates,eval=F}
+mendota@polygons[[1]]@Polygons[[1]]@coords - mendota_WGS84@polygons[[1]]@Polygons[[1]]@coords
+```
+
+# Project shapefile from geographic to projected coordinates
+It is just as easy to project the shapefile as it was to change the datum. 
+
+Dane County falls in UTM (Universal Transverse Mercator) zone 16. 
+Note: The UTM system is not a single map projection. The system instead divides the Earth into sixty zones, each being a six-degree band of longitude, and uses a secant transverse Mercator projection in each zone.
+
+```{r}
+mendota_UTM16 <- spTransform(mendota, CRS("+init=epsg:32616")) #project to UTM zone 16
+mendota_UTM16
+```
+
+You can see the data extent is now `297862.2, 307362.5, 4771864, 4779978 (xmin, xmax, ymin, ymax)`. UTM units are in meters, rather than degrees, which makes arithmetic calculations much easier. Here we can tell that Mendota is about 9550 m across (307362.5 - 297862.2)
+
