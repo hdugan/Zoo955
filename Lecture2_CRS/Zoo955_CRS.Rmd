@@ -138,3 +138,21 @@ mendota_UTM16
 
 You can see the data extent is now `297862.2, 307362.5, 4771864, 4779978 (xmin, xmax, ymin, ymax)`. UTM units are in meters, rather than degrees, which makes arithmetic calculations much easier. Here we can tell that Mendota is about 9550 m across (307362.5 - 297862.2)
 
+# Visualizing the difference between CRS
+Ok, this is a little hacky, because it's difficult to (because you usally shouldn't!!) plot two shapefiles with different coordinates systems on top of one another. However, if we do, we can see the difference in shape. 
+```{r,fig.width = 5,fig.height = 5}
+
+plot(mendota,col='navy')
+par(new =T)
+plot(c(297862.2, 307362.5), c(4771864, 4779978), yaxt='n', 
+     xaxt='n', ann=FALSE) # Have to make a new empty plot
+plot(mendota_UTM16,add=T,col='red3')
+legend('topleft',fill = c('navy','red3'),legend = c('lat/long','UTM'))
+```
+
+There isn't that much of a difference, but that's because both of these CRS represent Mendota well. What if we chose the wrong UTM zone? Like UTM zone 38? 
+```{r}
+mendota_UTM38 <- spTransform(mendota, CRS("+init=epsg:26910")) #project to UTM zone 10 (pacific north west)
+plot(mendota_UTM38,col='navy')
+```
+*Note, the x distance is now closer to 9750 meters. Distances are distorted as well. 
