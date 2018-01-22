@@ -156,3 +156,6 @@ mendota_UTM38 <- spTransform(mendota, CRS("+init=epsg:26910")) #project to UTM z
 plot(mendota_UTM38,col='navy')
 ```
 *Note, the x distance is now closer to 9750 meters. Distances are distorted as well. 
+
+# Homework
+What's the best way to check that CRS of two objects are identical? 

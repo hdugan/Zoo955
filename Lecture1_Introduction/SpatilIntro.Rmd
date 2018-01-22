@@ -3,8 +3,8 @@ title: "Zoo 955 - Introduction to Spatial Objects"
 author: "Hilary Dugan"
 date: "January 23, 2018"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -27,7 +27,6 @@ knitr::opts_chunk$set(fig.width=8, fig.height=6, fig.path='Figs/',echo = TRUE)
     * R markdown tutorial 
     * Or however you'd like to make a pdf
 
-
 # The spatial basics 
 
 * Commonly used R packages 
@@ -37,7 +36,6 @@ knitr::opts_chunk$set(fig.width=8, fig.height=6, fig.path='Figs/',echo = TRUE)
     * `library(maps)`
     * `library(raster)`
     * `library(maptools)`
-
 
 # Why use R for spatial analysis?
 Pros:
@@ -61,9 +59,8 @@ Cons:
   
 # Spatial objects
 * Spatial class has two slots
-* The first is a bounding box, and is mostly used for setting up
-plots
-* The second is a CRS class object defining the coordinate
+* 1) bounding box, dimension of the plot
+* 2) CRS class object defining the coordinate
 reference system, and may be set to CRS(as.character(NA)),
 its default value.
 * Operations on `Spatial` objects should update or copy these
@@ -155,6 +152,3 @@ Applied Spatial Data Analysis with R
 Springer. August 2008.*](Figs/SpatialGridDiagram.PNG)
 
 
-# Homework
-
-What's the best way to check that CRS of two objects are identical? 
