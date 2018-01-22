@@ -25,6 +25,7 @@ knitr::opts_chunk$set(fig.width=8, fig.height=6, fig.path='Figs/',echo = TRUE)
 * There will be short weekly assignments 
 * Typically I'll ask that you email me your assignments as a pdf 
     * R markdown tutorial 
+    * https://ismayc.github.io/rbasics-book/4-rmarkdown.html
     * Or however you'd like to make a pdf
 
 # The spatial basics 
