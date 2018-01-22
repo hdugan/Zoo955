@@ -1,20 +1,43 @@
 ---
 title: "Zoo 955 - Introduction to Spatial Objects"
 author: "Hilary Dugan"
-date: "January 12, 2018"
-output: html_document
+date: "January 23, 2018"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.width=8, fig.height=6, fig.path='Figs/',echo = TRUE)
 ```
 
-```{r load, echo=F, eval=T}
-#rm(list=ls())
-x <- c("sp", "rgdal", "rgeos", "maptools", "classInt", "RColorBrewer", "GISTools", "maps", "raster", 'ggmap')
-# install.packages(x) # warning: this may take a number of minutes
-# lapply(x, library, character.only = TRUE) #load the required packages
-```
+# 955 basics 
+
+* R verison >= 3.4 
+* Recommend RStudio as a code editor 
+    * This is what I will use in class 
+    * RStudio Desktop 1.1.414 
+* Your primary reference will probably be community answers on Stack Overflow (https://stackoverflow.com)
+* Recommend creating a username and upvoting answers you find helpful
+
+# 955 basics - Homework 
+
+* There will be short weekly assignments 
+* Typically I'll ask that you email me your assignments as a pdf 
+    * R markdown tutorial 
+    * Or however you'd like to make a pdf
+
+
+# The spatial basics 
+
+* Commonly used R packages 
+    * `library(rgdal)`
+    * `library(rgeos)`
+    * `library(sp)`
+    * `library(maps)`
+    * `library(raster)`
+    * `library(maptools)`
+
 
 # Why use R for spatial analysis?
 Pros:
@@ -28,7 +51,7 @@ Cons:
 * Memory limitations 
 
 # Spatial Objects
-  |       |  Without attributes | With attributes |
+  |       |  Without attributes | With attributes (data) |
   | ----- | ------------------  | --------------  |
   |Points |  SpatialPoints      | SpatialPointsDataFrame|
   |Lines |  SpatialLines      | SpatialLinesDataFrame|
@@ -131,3 +154,7 @@ need to store NA values where attribute values are missing
 Applied Spatial Data Analysis with R 
 Springer. August 2008.*](Figs/SpatialGridDiagram.PNG)
 
+
+# Homework
+
+What's the best way to check that CRS of two objects are identical? 
