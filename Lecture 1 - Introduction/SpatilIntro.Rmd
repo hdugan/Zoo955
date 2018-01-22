@@ -1,0 +1,133 @@
+---
+title: "Zoo 955 - Introduction to Spatial Objects"
+author: "Hilary Dugan"
+date: "January 12, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=8, fig.height=6, fig.path='Figs/',echo = TRUE)
+```
+
+```{r load, echo=F, eval=T}
+#rm(list=ls())
+x <- c("sp", "rgdal", "rgeos", "maptools", "classInt", "RColorBrewer", "GISTools", "maps", "raster", 'ggmap')
+# install.packages(x) # warning: this may take a number of minutes
+# lapply(x, library, character.only = TRUE) #load the required packages
+```
+
+# Why use R for spatial analysis?
+Pros:
+
+* Breadth of statistical packages
+* Integration with other data/stats
+* Free, easy to access
+
+Cons: 
+
+* Memory limitations 
+
+# Spatial Objects
+  |       |  Without attributes | With attributes |
+  | ----- | ------------------  | --------------  |
+  |Points |  SpatialPoints      | SpatialPointsDataFrame|
+  |Lines |  SpatialLines      | SpatialLinesDataFrame|
+  |Polygons |  SpatialPolygons      | SpatialPolygonsDataFrame|
+  |Raster |  SpatialGrid      | SpatialGridDataFrame|
+  |Raster |  SpatialPixels      | SpatialPixelsDataFrame|
+  
+# Spatial objects
+* Spatial class has two slots
+* The first is a bounding box, and is mostly used for setting up
+plots
+* The second is a CRS class object defining the coordinate
+reference system, and may be set to CRS(as.character(NA)),
+its default value.
+* Operations on `Spatial` objects should update or copy these
+values to the new Spatial objects being created  
+  
+
+# SpatialPoints
+* The most basic spatial data object is a point, which may have
+2 or 3 dimensions
+* A single coordinate, or a set of such coordinates, may be used
+to define a SpatialPoints object
+* The points in a SpatialPoints object may be associated with
+a row of attributes to create a SpatialPointsDataFrame object
+
+# Example: SpatialPoints
+```{r spoint, echo=T, eval=T}
+library(sp)
+spoint <- data.frame(y = 43.07, x = -89.40)
+summary(spoint)
+str(spoint)
+coords <- SpatialPoints(spoint)
+str(coords)
+summary(coords)
+```
+
+# SpatialPointsDataFrame
+Add data to make a SpatialPointsDataFrame object. 
+
+```{r sdata, echo=T, eval=T}
+# library(sp)
+sdata <- SpatialPointsDataFrame(coords, data = data.frame(population = 327000))
+str(sdata)
+summary(sdata)
+```
+
+# Spatial Points + Data Diagram 
+![*Figure credit: Roger S. Bivand, Edzer J. Pebesma and Virgilio Gómez-Rubio. 
+Applied Spatial Data Analysis with R 
+Springer. August 2008.*](Figs/SpatialPointsDiagram.PNG)
+
+
+# Spatial Lines & Polygons
+* A Line object is a collection of 2D coordinates
+* A Polygon object is a Line object with equal first and last
+coordinates
+* A Lines object is a list of Line objects, such as all the
+contours at a single elevation; the same relationship holds
+between a Polygons object and a list of Polygon objects, such
+as islands belonging to the same county
+* SpatialLines and SpatialPolygons objects are made using
+lists of Lines or Polygons objects respectively
+* SpatialLinesDataFrame and SpatialPolygonsDataFrame
+objects are defined using SpatialLines and SpatialPolygons
+objects and standard data frames, and the ID fields are here
+required to match the data frame row names
+
+# Example: Spatial Polygons
+```{r spoly, echo=T, eval=T}
+sdata <- data.frame(y = c(43.07,43.10,43.08,43.07), 
+                    x = c(-89.40,-89.41,-89.5,089.40))
+str(sdata)
+spoly <- Polygons(list(Polygon(sdata)), ID = "madison")
+summary(spoly)
+spolys <- SpatialPolygons(list(spoly))
+summary(spolys)
+```
+
+# Spatial Polygons Diagram 
+![*Figure credit: Roger S. Bivand, Edzer J. Pebesma and Virgilio Gómez-Rubio. 
+Applied Spatial Data Analysis with R 
+Springer. August 2008.*](Figs/SpatialPolygonsDiagram.PNG)
+
+# Spatial grids and pixels
+* There are two representations for data on regular rectangular
+grids (oriented N-S, E-W): `SpatialPixels` and `SpatialGrid`
+* SpatialPixels are like SpatialPoints objects, but the
+coordinates have to be regularly spaced; the coordinates are
+stored, as are grid indices
+* SpatialPixelsDataFrame objects only store attribute data
+where it is present, but need to store the coordinates and grid
+indices of those grid cells
+* SpatialGridDataFrame objects do not need to store
+coordinates, because they fill the entire defined grid, but they
+need to store NA values where attribute values are missing
+
+# Spatial Grids Diagram 
+![*Figure credit: Roger S. Bivand, Edzer J. Pebesma and Virgilio Gómez-Rubio. 
+Applied Spatial Data Analysis with R 
+Springer. August 2008.*](Figs/SpatialGridDiagram.PNG)
+
