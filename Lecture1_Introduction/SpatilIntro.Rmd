@@ -1,15 +1,20 @@
 ---
-title: "Zoo 955 - Introduction to Spatial Objects"
+title: "Zoo 955 - Introduction to Zoo 955"
 author: "Hilary Dugan"
 date: "January 23, 2018"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.width=8, fig.height=6, fig.path='Figs/',echo = TRUE)
 ```
+
+# 955 basics
+
+* Class notes: https://github.com/hdugan/Zoo955
+* Class ZOOM: https://zoom.us/j/726741289
 
 # 955 basics 
 
@@ -20,13 +25,21 @@ knitr::opts_chunk$set(fig.width=8, fig.height=6, fig.path='Figs/',echo = TRUE)
 * Your primary reference will probably be community answers on Stack Overflow (https://stackoverflow.com)
 * Recommend creating a username and upvoting answers you find helpful
 
-# 955 basics - Homework 
+# 955 Assesment 
+
+* Grades will be based on:
+    * short assignments (25%)
+    * participating in class discussion (50%) 
+    * final project based on individual research topics that will be presented during the final two weeks of the semester (25%)
+* Numerical grades are assigned as follows: 93-100 (A), 88-92 (AB), 82-87 (B), 78-81 (BC).
 
 * There will be short weekly assignments 
 * Typically I'll ask that you email me your assignments as a pdf 
     * R markdown tutorial 
     * https://ismayc.github.io/rbasics-book/4-rmarkdown.html
     * Or however you'd like to make a pdf
+
+* There's no class Feb 13th. Instead, short proposals of your intended research endeavour will be due. 
 
 # The spatial basics 
 
@@ -98,7 +111,7 @@ summary(sdata)
 ```
 
 # Spatial Points + Data Diagram 
-![*Figure credit: Roger S. Bivand, Edzer J. Pebesma and Virgilio Gómez-Rubio. 
+![*Figure credit: Roger S. Bivand, Edzer J. Pebesma and Virgilio G?mez-Rubio. 
 Applied Spatial Data Analysis with R 
 Springer. August 2008.*](Figs/SpatialPointsDiagram.PNG)
 
@@ -130,7 +143,7 @@ summary(spolys)
 ```
 
 # Spatial Polygons Diagram 
-![*Figure credit: Roger S. Bivand, Edzer J. Pebesma and Virgilio Gómez-Rubio. 
+![*Figure credit: Roger S. Bivand, Edzer J. Pebesma and Virgilio G?mez-Rubio. 
 Applied Spatial Data Analysis with R 
 Springer. August 2008.*](Figs/SpatialPolygonsDiagram.PNG)
 
@@ -148,8 +161,30 @@ coordinates, because they fill the entire defined grid, but they
 need to store NA values where attribute values are missing
 
 # Spatial Grids Diagram 
-![*Figure credit: Roger S. Bivand, Edzer J. Pebesma and Virgilio Gómez-Rubio. 
+![*Figure credit: Roger S. Bivand, Edzer J. Pebesma and Virgilio G?mez-Rubio. 
 Applied Spatial Data Analysis with R 
 Springer. August 2008.*](Figs/SpatialGridDiagram.PNG)
 
+# Raster Package
+Often, instead of using `SpatialGrid`, your prefered obejct format will be a `RasterLayer`
 
+Get to know the Raster package
+
+* Description: Reading, writing, manipulating, analyzing and modeling of gridded spatial data. The packageimplements basic and high-level functions. Processing of very large files is supported
+
+```{r raster, echo=T, eval=T}
+library(raster)
+f <- system.file("external/test.grd", package="raster")
+r <- raster(f)
+r
+plot(r)
+```
+
+Can also have `RasterBrick` objects. Basically multi-layer `RasterLayer` objects. We'll see more of these later in the semester. 
+```{r rasterbrick, echo=T, eval=T}
+b <- brick(system.file("external/rlogo.grd", package="raster"))
+b
+```
+
+# Homework 
+Make an r markdown pdf. It can be anything you want. Send it to me. 

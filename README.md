@@ -28,6 +28,6 @@ If you have never used GIS in your research, you may think of it as a great way 
 
 This course will cover topics such as: handling spatial data, coordinates and projections, raster data sets (like climate or land cover data), data interrogation, modifying spatial data, maps, and the basics of satellite imagery. Even if you do not currently use spatial data in your research, it is advantageous to know how to complete simple GIS tasks. Both for your own research and your future career. 
 
-GRADING 
+GRADING:
 Grades will be based on short assignments (25%), participating in class discussion (50%), and a final project based on individual research topics that will be presented during the final two weeks of the semester (25%). Numerical grades are assigned as follows: 93-100 (A), 88-92 (AB), 82-87 (B), 78-81 (BC).
 
