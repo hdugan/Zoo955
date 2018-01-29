@@ -1,7 +1,7 @@
 ---
 title: "Zoo955 - CRS projections"
 author: "Hilary Dugan"
-date: "1/15/2018"
+date: "1/30/2018"
 output: html_document
 ---
 
@@ -106,7 +106,7 @@ plot(mendota, col='navy')
 Let's transform the CRS from NAD83 to WGS84:
 ```{r transform Mendota crs}
 mendota_WGS84 <- spTransform(mendota, CRS("+init=epsg:4326")) #shorter method using EPSG codes (however, I always forget how to format these)
-mendota_WGS84 <- spTransform(mendota, CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0")) #longer method, but sometimes easier
+mendota_WGS84 <- spTransform(mendota, CRS("+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")) #longer method, but sometimes easier
 ```
 
 Let's check if we were successful in transforming the CRS of the shapefile. I actually prefer `crs` in the `raster` package to `CRS` in the `rgdal` package. 
@@ -118,6 +118,7 @@ crs(mendota)
 *If you plot these both, you can't tell the difference in the datum. This is because NAD83 is centered over the middle of the North American plate, so drift is minimal in Wisconsin*
 
 How can we see if there is a difference? We can extract the x,y coordinates for two polygons. Shapefiles have a cryptic nested slot layout, but coordinates can be extracted from our polygon by:
+
 `mendota@polygons[[1]]@Polygons[[1]]@coords`
 
 If we subtract the two, we may see a difference. Most of the points are exactly the same. A few are e-15 off. 
@@ -136,7 +137,9 @@ mendota_UTM16 <- spTransform(mendota, CRS("+init=epsg:32616")) #project to UTM z
 mendota_UTM16
 ```
 
-You can see the data extent is now `297862.2, 307362.5, 4771864, 4779978 (xmin, xmax, ymin, ymax)`. UTM units are in meters, rather than degrees, which makes arithmetic calculations much easier. Here we can tell that Mendota is about 9550 m across (307362.5 - 297862.2)
+You can see the data extent is now `297862.2, 307362.5, 4771864, 4779978 (xmin, xmax, ymin, ymax)`. 
+
+UTM units are in meters, rather than degrees, which makes arithmetic calculations much easier. Here we can tell that Mendota is about 9550 m across (307362.5 - 297862.2)
 
 # Visualizing the difference between CRS
 Ok, this is a little hacky, because it's difficult to (because you usally shouldn't!!) plot two shapefiles with different coordinates systems on top of one another. However, if we do, we can see the difference in shape. 
@@ -158,4 +161,11 @@ plot(mendota_UTM38,col='navy')
 *Note, the x distance is now closer to 9750 meters. Distances are distorted as well. 
 
 # Homework
-What's the best way to check that CRS of two objects are identical? 
+Reminder: Email assignment .pdf file. Recommended to use RMarkdown, so code and output are all in one place. Email by Monday at 9am. 
+
+1) Download the LTER lake shapefiles from the LTER database. Map Lake Mendota. Add a point for the location of the CFL. (Keep these files, we'll use them in future classes)
+
+2) Download the National Land Cover (NLCD) dataset for 2011. Load it into R. What is the CRS? (Keep this data, we'll use it in future classes)
+
+3) What's the best way to check that CRS of two objects are identical? 
+
