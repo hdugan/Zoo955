@@ -1,0 +1,20 @@
+---
+title: "Zoo955_Shapefiles"
+author: "Hilary Dugan"
+date: "February 5, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Download Data
+Easy to search for 'spatial data' under NTL categories. Today we'll be working with Lake Mendota spatial data including the lake boundary, bathymetry/contours, and watershed shapefiles. 
+
+Watersheds:
+https://lter.limnology.wisc.edu/dataset/north-temperate-lakes-lter-yahara-lakes-district-lake-watersheds
+Bathymetry: 
+https://lter.limnology.wisc.edu/dataset/north-temperate-lakes-lter-yahara-lakes-district-bathymetry
+Lakes:
+https://lter.limnology.wisc.edu/dataset/north-temperate-lakes-lter-yahara-lakes-district-boundary
