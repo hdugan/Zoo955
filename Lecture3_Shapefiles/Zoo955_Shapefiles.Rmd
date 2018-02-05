@@ -1,7 +1,7 @@
 ---
-title: "Zoo955_Shapefiles"
+title: "Zoo955 - Working With Shapefiles"
 author: "Hilary Dugan"
-date: "February 5, 2018"
+date: "February 6, 2018"
 output: html_document
 ---
 
@@ -9,12 +9,75 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Download Data
+## Download data
 Easy to search for 'spatial data' under NTL categories. Today we'll be working with Lake Mendota spatial data including the lake boundary, bathymetry/contours, and watershed shapefiles. 
 
-Watersheds:
+*Watersheds*:
 https://lter.limnology.wisc.edu/dataset/north-temperate-lakes-lter-yahara-lakes-district-lake-watersheds
-Bathymetry: 
+
+*Bathymetry*: 
 https://lter.limnology.wisc.edu/dataset/north-temperate-lakes-lter-yahara-lakes-district-bathymetry
-Lakes:
+
+*Lakes*:
 https://lter.limnology.wisc.edu/dataset/north-temperate-lakes-lter-yahara-lakes-district-boundary
+
+## Extract Lake Mendota data
+
+Read in shapefiles using `readOGR`. Because there is an attached data.frame, you can use `stringsAsFactors = F` just like a normal data.frame
+```{r lakes, message=FALSE,warning=FALSE}
+library(rgdal)
+lakes = readOGR('Data/yld_study_lakes.shp',layer = 'yld_study_lakes',stringsAsFactors = F)
+summary(lakes)
+```
+
+We can see that there are many attributes associated with the shapefiles. Since we're interested in Lake Mendota, we can subset based on SHAIDNAME, LAKEID, or LAKE_NAME
+
+```{r mendota}
+mendota = lakes[lakes@data$LAKEID == 'ME',]
+```
+
+The watersheds and bathymetry are already subsetted, which is handy
+```{r mendota.watershed}
+mendota.ws = readOGR('Data/YaharaBasins/Mendota_Basin.shp',layer = 'Mendota_Basin',stringsAsFactors = F,verbose = F)
+mendota.bathy = readOGR('Data/Bathymetry/mendota_bathy.shp',layer = 'mendota_bathy',verbose = F)
+```
+
+## SpatialPolygonsDataFrame Structure
+
+The structure of `SpatialPolygonsDataFrame` make a lot more sense when you take a minute to look at the internal structure. It gets overwhelming when there are lots of polygons, so let's start with our Mendota object
+```{r mendota.stucture}
+str(mendota)
+```
+
+## Extract Properties
+
+Knowing the structure makes extracting properties much easier. 
+```{r area}
+mendota@proj4string
+mendota@polygons[[1]]@area
+mendota@polygons[[1]]@Polygons[[1]]@area
+```
+
+## Use slot function 
+Can also use the `slot` function. Usage: `slot(object, name)`
+
+or `slotNames(x)` 
+
+```{r slots}
+slotNames(lakes)
+
+slotNames(lakes@polygons[[1]]) # Can use within the lists as well 
+
+slot(lakes,'proj4string')
+```
+
+Can nest within an `apply` function to extra all the properties 
+
+```{r slot.apply}
+sapply(slot(lakes, "polygons"), slot, "ID")
+sapply(slot(lakes, "polygons"), slot, "area")
+```
+
+# Area of contours
+
+Looking at `mendota.bathy@data`, there are only three columns **ID**, **DEPTH_FT**, and **DEPTH_M**
