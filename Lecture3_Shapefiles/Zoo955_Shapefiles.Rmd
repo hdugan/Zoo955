@@ -39,7 +39,7 @@ mendota = lakes[lakes@data$LAKEID == 'ME',]
 The watersheds and bathymetry are already subsetted, which is handy
 ```{r mendota.watershed}
 mendota.ws = readOGR('Data/YaharaBasins/Mendota_Basin.shp',layer = 'Mendota_Basin',stringsAsFactors = F,verbose = F)
-mendota.bathy = readOGR('Data/Bathymetry/mendota_bathy.shp',layer = 'mendota_bathy',verbose = F)
+mendota.bathy = readOGR('Data/Bathymetry/mendota-contours-all.shp',layer = 'mendota-contours-all',verbose = F)
 ```
 
 ## SpatialPolygonsDataFrame Structure
@@ -78,6 +78,123 @@ sapply(slot(lakes, "polygons"), slot, "ID")
 sapply(slot(lakes, "polygons"), slot, "area")
 ```
 
-# Area of contours
+## Working with the bathymetry data
+
+There are 88 polygons `nrow(mendota.bathy)`. Each depth interval has multiple polygons.
+
+What do the polygons look like? 
+```{r bathygons}
+plot(mendota.bathy[10,],col='gold')
+plot(mendota.bathy[25,],col='red',add=T)
+```
 
 Looking at `mendota.bathy@data`, there are only three columns **ID**, **DEPTH_FT**, and **DEPTH_M**
+
+Would be handy to have the area of each polygon in the table. Can use our `sapply` function to extract the areas and add them to the data.frame
+
+```{r bathygons.data}
+mendota.bathy@data$AREA_m2 = sapply(slot(mendota.bathy, "polygons"), slot, "area")
+head(mendota.bathy@data)
+```
+
+We can work with this data.frame the same we would with any data.frame
+```{r bathygons.area, warning=FALSE, message=FALSE}
+library(dplyr)
+polygon.areas = mendota.bathy@data %>% group_by(ID) %>%
+  summarise_at('AREA_m2',sum) %>%
+  arrange(ID)
+head(polygon.areas)
+```
+
+## But wait. 
+Take a look at one individual depth. The polygons overlap. So we're overestimating areas. 
+```{r bathygons.area2, warning=FALSE, message=FALSE}
+thirty = mendota.bathy[mendota.bathy@data$ID == '30',]
+sapply(slot(thirty, "polygons"), slot, "area") # Get areas
+
+plot(thirty[1,],col='navy')
+plot(thirty[2:6,],col='red',add=T)
+```
+
+We can create a **union** of these polygons by joining intersecting geometries
+```{r bathygons.area3, warning=FALSE, message=FALSE}
+library(rgeos)
+union.thirty = gUnaryUnion(thirty)
+plot(union.thirty)
+sum(sapply(slot(union.thirty, "polygons"), slot, "area")) # new area
+sum(sapply(slot(thirty, "polygons"), slot, "area")) # compare to old area
+```
+Now it would be nice if we could `group_by` to create a summarised data.frame with updated areas. But we can't, because dplyr won't read `sp` objects. Would have to do some crazy apply function, or a loop. 
+
+## Welcome to sf
+https://cran.r-project.org/web/packages/sf/vignettes/sf1.html
+
+**Simple features** refer to a formal standard (ISO 19125-1:2004) that describes how objects in the real world can be represented in computers, with emphasis on the spatial geometry of these objects. It also describes how such objects can be stored in and retrieved from databases, and which geometrical operations should be defined for them.
+
+The standard is widely implemented in spatial databases (such as PostGIS), commercial GIS (e.g., ESRI ArcGIS) and forms the vector data basis for libraries such as GDAL. A subset of simple features forms the GeoJSON standard.
+
+R has well-supported classes for storing spatial data (sp) and interfacing to the above mentioned environments (rgdal, rgeos), but has so far lacked a complete implementation of simple features, making conversions at times convoluted, inefficient or incomplete. The package sf tries to fill this gap, and **aims at succeeding sp in the long term**.
+
+```{r sf, warning=FALSE, message=FALSE}
+library(sf)
+sf.bathy <- st_read('Data/Bathymetry/mendota-contours-all.shp')
+plot(sf.bathy)
+
+lakes = st_read('Data/yld_study_lakes.shp')
+mendota = lakes %>% filter(LAKEID == 'ME')
+```
+
+You *can* convert `sf` objections to `sp` objects: `as(mendota, "Spatial")`
+
+## sf areas
+Most geometries are WAY easier to calculate 
+```{r sf.areas, warning=FALSE, message=FALSE}
+head(st_area(sf.bathy))
+
+areas = sf.bathy %>% mutate(AREA.m2 = st_area(sf.bathy)) %>%
+  group_by(ID) %>%
+  summarise(areas = st_union(geometry))
+
+data.frame(ID = areas$ID,area = st_area(areas),old.areas = polygon.areas)
+```
+
+## sf CRS
+sf ojects work with EPSG codes nicely, and prefer them over proj4strings. Mostly for convience. 
+
+Coordinate reference systems can be applied using `st_crs`
+
+Coordinate reference system transformations can be carried out using `st_transform`
+```{r sf.crs, warning=FALSE, message=FALSE}
+st_crs(areas) = st_crs(mendota)
+```
+
+# sf geometrical operations
+The commands `st_intersects`, `st_disjoint`, `st_touches`,
+`st_crosses`, `st_within`, `st_contains`, `st_overlaps`,
+`st_equals`, `st_covers`, `st_covered_by`, `st_equals_exact` and
+`st_is_within_distance` return a sparse matrix with matching (TRUE)
+indexes, or a full logical matrix:
+```{r}
+st_intersects(areas,mendota)
+```
+
+The commands `st_buffer`, `st_boundary`, `st_convexhull`,
+`st_union_cascaded`, `st_simplify`, `st_triangulate`,
+`st_polygonize`, `st_centroid`, `st_segmentize`, and `st_union`
+return new geometries. Example of st_buffer:
+
+```{r}
+buffer <- st_buffer(mendota, dist = 3000)
+plot(buffer$geometry)
+plot(mendota$geometry,add=T,col='turquoise')
+```
+
+Commands `st_intersection`, `st_union`, `st_difference`,
+`st_sym_difference` return new geometries that are a function of
+pairs of geometries:
+```{r}
+bathy.diff = st_difference(areas[1,]$geometry,areas[6,]$geometry)
+plot(bathy.diff,col='turquoise')
+```
+
+
