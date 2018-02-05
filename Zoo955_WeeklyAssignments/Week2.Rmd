@@ -1,0 +1,43 @@
+---
+title: "Week 2 - Homework"
+author: "Hilary Dugan"
+date: "February 6, 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### 1) Download the LTER lake shapefiles from the LTER database. Map Lake Mendota. Add a point for the location of the CFL.
+
+```{r lakes, message=FALSE,warning=FALSE}
+library(rgdal)
+library(sp)
+library(raster)
+lakes = readOGR('../Lecture3_Shapefiles/Data/yld_study_lakes.shp',layer = 'yld_study_lakes',stringsAsFactors = F)
+mendota = lakes[lakes@data$LAKEID == 'ME',]
+
+cfl = data.frame(lat = 43.077391, long = -89.404241)
+coordinates(cfl) = ~long+lat
+crs(cfl) = CRS("+init=epsg:4326")
+cfl = spTransform(cfl,crs(mendota))
+
+plot(mendota,col='lightskyblue',main='Lake Mendota')
+plot(cfl,add=T,pch=16,col='red3',cex=3)
+```
+
+
+### 2) Download the National Land Cover (NLCD) dataset for 2011. Load it into R. What is the CRS? 
+```{r, message=FALSE,warning=FALSE}
+nlcd = raster('~/NLCD/nlcd_2011_landcover_2011_edition_2014_10_10/nlcd_2011_landcover_2011_edition_2014_10_10.img')
+crs(nlcd)
+```
+Projection is `aea` = albers equal area
+
+### 3) What's the best way to check that CRS of two objects are identical? 
+```{r, message=FALSE,warning=FALSE}
+identicalCRS(mendota,cfl)
+identicalCRS(mendota,nlcd)
+```
