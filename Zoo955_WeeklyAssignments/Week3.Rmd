@@ -1,0 +1,72 @@
+---
+title: "Zoo955 - Week 3"
+author: "Hilary Dugan"
+date: "2/13/2018"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1
+Definefunctions from the `sf` package
+
+`st_intersects` =
+
+`st_disjoint` =
+
+`st_touches` =
+
+`st_crosses` =
+
+`st_within` =
+
+`st_contains` =
+
+`st_overlaps` =
+
+`st_equals` =
+
+`st_covers` =
+
+`st_covered_by` =
+
+`st_equals_exact` =
+
+`st_is_within_distance` =
+
+`st_buffer` =
+
+`st_boundary` =
+
+`st_convexhull` =
+
+`st_union_cascaded` =
+
+`st_simplify` =
+
+`st_triangulate` =
+
+`st_polygonize` =
+
+`st_centroid` =
+
+`st_segmentize` =
+
+`st_union` =
+
+## Question 2 
+**Make a 500 m buffer of the 4 southern LTER lakes. Which buffers overlap?**
+
+*Lakes Data*:
+https://lter.limnology.wisc.edu/dataset/north-temperate-lakes-lter-yahara-lakes-district-boundary
+
+Read in shapefiles using `readOGR`
+```{r lakes, message=FALSE,warning=FALSE}
+library(sf)
+lakes = st_read(dsn = '../Lecture3_Shapefiles/Data/yld_study_lakes.shp',stringsAsFactors = F)
+```
+
+## Question 3
+Increase the size of the lakes by 2x. What is the percent of Mendota that overlaps with Monona?
