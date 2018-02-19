@@ -128,28 +128,28 @@ $(document).ready(function () {
 <div id="question-1" class="section level2">
 <h2>Question 1</h2>
 <p>Define functions from the <code>sf</code> package. Good resource: <a href="https://en.wikipedia.org/wiki/DE-9IM" class="uri">https://en.wikipedia.org/wiki/DE-9IM</a></p>
-<p><code>st_intersects</code> =</p>
-<p><code>st_disjoint</code> =</p>
-<p><code>st_touches</code> =</p>
-<p><code>st_crosses</code> =</p>
-<p><code>st_within</code> =</p>
-<p><code>st_contains</code> =</p>
-<p><code>st_overlaps</code> =</p>
-<p><code>st_equals</code> =</p>
-<p><code>st_covers</code> =</p>
-<p><code>st_covered_by</code> =</p>
+<p><code>st_intersects</code> = For a pair of objects (each object containing one or more points, lines, or polygons), st_intersects tells you whether they intersect. “Intersect” means two geometries share any portion of space, and functions such as “overlaps” and “touches” are subcategories of intersection. Returns intersecting geometries as either a list (sparse = TRUE) or a matrix (sparse = FALSE). Some good documentation here: <a href="https://cran.r-project.org/web/packages/sf/vignettes/sf1.html#geometrycollection" class="uri">https://cran.r-project.org/web/packages/sf/vignettes/sf1.html#geometrycollection</a></p>
+<p><code>st_disjoint</code> = This is the opposite of st_intersects. Disjointed objects do not share any space together.</p>
+<p><code>st_touches</code> = point/line, point/poly, line/poly –must be on end point; poly/poly–must not share internal space</p>
+<p><code>st_crosses</code> = only allowable with line/line and line/poly (not poly/poly). crossing does not include endpoints ever, and lines must exist inside and outside of polygons.</p>
+<p><code>st_within</code> = True if A is completely inside of B</p>
+<p><code>st_contains</code> = True if no point in B lies in the exterior of A, and at least one point lies inside of A</p>
+<p><code>st_overlaps</code> = if the shapes share space, i.e., intersect, but one is not completely within another, will return list of IDs (row number), describing which IDs overlap with one another.</p>
+<p><code>st_equals</code> = if the shapes are the same, i.e., occupying the same space, will return list of IDs (row number) describing which IDs are equal to one another.</p>
+<p><code>st_covers</code> = This function tests if the geometry of object x covers the geometry of object y. If no points in object y are beyond the boundaries of object x, then object x completely covers object y. <a href="https://postgis.net/docs/ST_Covers.html" class="uri">https://postgis.net/docs/ST_Covers.html</a></p>
+<p><code>st_covered_by</code> = This is essentially the inverse of st_covers. st_covered_by tests if the geometry of object x is covered by the geomertry of object y. If no points in object x are beyond the boundaries of object y, then object x is completely covered by y (and y completely covers x). st_covers(x,y) will produce the same result as st_covered_by(y,x).</p>
 <p><code>st_equals_exact</code> =</p>
 <p><code>st_is_within_distance</code> =</p>
-<p><code>st_buffer</code> =</p>
-<p><code>st_boundary</code> =</p>
-<p><code>st_convexhull</code> =</p>
-<p><code>st_union_cascaded</code> =</p>
+<p><code>st_buffer</code> = create a new polygon that all coordinates are X distance away from the edge of another polygon, line or point. The buffer can extend outward (+) or inward (-) of a polygon.</p>
+<p><code>st_boundary</code> = this returns the geometry, which is the combinatorial boundary of the given geometric object. For polygons, this is simply the outline. For points, it seems to connect points in the order (example) without closing them</p>
+<p><code>st_convexhull</code> = returns the smallest geometry that cantains all geometries for a given shape. It’s like putting a rubber band around a shape.</p>
+<p><code>st_union_cascaded</code> = Doesn’t exist anymore. _cascaded refered to a new, at the time, algorithm that sped up st_union</p>
 <p><code>st_simplify</code> =</p>
-<p><code>st_triangulate</code> =</p>
-<p><code>st_polygonize</code> =</p>
+<p><code>st_triangulate</code> = connects 3D cloud of points with triangles to create a connected surface called a TIN, it’s often used in analysis of topography</p>
+<p><code>st_polygonize</code> = creates a multipolygon feature from lines of an input geometry. If the input is lines, it will create polygons only if enclosed by overlapping vertices.</p>
 <p><code>st_centroid</code> =</p>
 <p><code>st_segmentize</code> =</p>
-<p><code>st_union</code> =</p>
+<p><code>st_union</code> = returns a polygon or line feature where polygons/lines are combined if they overlap/touch</p>
 </div>
 <div id="question-2" class="section level2">
 <h2>Question 2</h2>

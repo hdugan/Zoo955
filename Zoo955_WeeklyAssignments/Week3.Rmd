@@ -2,7 +2,9 @@
 title: "Zoo955 - Week 3"
 author: "Hilary Dugan"
 date: "2/13/2018"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include = FALSE}
@@ -12,49 +14,49 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Question 1
 Define functions from the `sf` package. Good resource: https://en.wikipedia.org/wiki/DE-9IM
 
-`st_intersects` =
+`st_intersects` =  For a pair of objects (each object containing one or more points, lines, or polygons), st_intersects tells you whether they intersect. "Intersect" means two geometries share any portion of space, and functions such as "overlaps" and "touches" are subcategories of intersection. Returns intersecting geometries as either a list (sparse = TRUE) or a matrix (sparse = FALSE). Some good documentation here: https://cran.r-project.org/web/packages/sf/vignettes/sf1.html#geometrycollection
 
-`st_disjoint` =
+`st_disjoint` = This is the opposite of st_intersects. Disjointed objects do not share any space together.
 
-`st_touches` =
+`st_touches` = point/line, point/poly, line/poly --must be on end point; poly/poly--must not share internal space
 
-`st_crosses` =
+`st_crosses` = only allowable with line/line and line/poly (not poly/poly). crossing does not include endpoints ever, and lines must exist inside and outside of polygons.
 
-`st_within` =
+`st_within` = True if A is completely inside of B
 
-`st_contains` =
+`st_contains` = True if no point in B lies in the exterior of A, and at least one point lies inside of A
 
-`st_overlaps` =
+`st_overlaps` = if the shapes share space, i.e., intersect, but one is not completely within another, will return list of IDs (row number), describing which IDs overlap with one another. 
 
-`st_equals` =
+`st_equals` = if the shapes are the same, i.e., occupying the same space, will return list of IDs (row number) describing which IDs are equal to one another.
 
-`st_covers` =
+`st_covers` = This function tests if the geometry of object x covers the geometry of object y. If no points in object y are beyond the boundaries of object x, then object x completely covers object y. https://postgis.net/docs/ST_Covers.html 
 
-`st_covered_by` =
+`st_covered_by` = This is essentially the inverse of st_covers. st_covered_by tests if the geometry of object x is covered by the geomertry of object y. If no points in object x are beyond the boundaries of object y, then object x is completely covered by y (and y completely covers x). st_covers(x,y) will produce the same result as st_covered_by(y,x).
 
 `st_equals_exact` =
 
 `st_is_within_distance` =
 
-`st_buffer` =
+`st_buffer` = create a new polygon that all coordinates are X distance away from the edge of another polygon, line or point. The buffer can extend outward (+) or inward (-) of a polygon.
 
-`st_boundary` =
+`st_boundary` = this returns the geometry, which is the combinatorial boundary of the given geometric object. For polygons, this is simply the outline. For points, it seems to connect points in the order (example) without closing them
 
-`st_convexhull` =
+`st_convexhull` = returns the smallest geometry that cantains all geometries for a given shape. It's like putting a rubber band around a shape.
 
-`st_union_cascaded` =
+`st_union_cascaded` = Doesn't exist anymore. _cascaded refered to a new, at the time, algorithm that sped up st_union
 
 `st_simplify` =
 
-`st_triangulate` =
+`st_triangulate` = connects 3D cloud of points with triangles to create a connected surface called a TIN, it's often used in analysis of topography
 
-`st_polygonize` =
+`st_polygonize` = creates a multipolygon feature from lines of an input geometry.  If the input is lines, it will create polygons only if enclosed by overlapping vertices.
 
 `st_centroid` =
 
 `st_segmentize` =
 
-`st_union` =
+`st_union` =  returns a polygon or line feature where polygons/lines are combined if they overlap/touch
 
 ## Question 2 
 **Make a 500 m buffer of the 4 southern LTER lakes. Which buffers overlap?**
