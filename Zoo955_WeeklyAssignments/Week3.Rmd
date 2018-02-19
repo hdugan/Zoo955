@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Question 1
-Definefunctions from the `sf` package
+Define functions from the `sf` package. Good resource: https://en.wikipedia.org/wiki/DE-9IM
 
 `st_intersects` =
 
@@ -66,7 +66,60 @@ Read in shapefiles using `readOGR`
 ```{r lakes, message=FALSE,warning=FALSE}
 library(sf)
 lakes = st_read(dsn = '../Lecture3_Shapefiles/Data/yld_study_lakes.shp',stringsAsFactors = F)
+# What are the lake IDs?
+lakes$LAKEID
 ```
 
+Make 500 m buffer 
+```{r, message=FALSE,warning=FALSE}
+buffer500 = st_buffer(lakes,500)
+#Check if buffers overlap
+st_overlaps(buffer500)
+```
+
+We know the order of the lake IDS (FI, ME, MO, WI). So based on the overlap matrix. 
+
+* Mendota overlaps with Monona. 
+* Monona overlaps with Mendota and Wingra
+* Wingra overlaps with Monona
+
 ## Question 3
-Increase the size of the lakes by 2x. What is the percent of Mendota that overlaps with Monona?
+**Increase the size of the lakes by 2x. What is the percent of Mendota that overlaps with Monona?**
+
+Note: 
+
+* You can't use a buffer because that does not retain the shape of the lakes. 
+* You can't just multiply the lakes x2, because that multiplies the coordinates. You end up with the lakes somewhere other than Wisconsin. 
+
+Instead:
+
+* Find the distance from the edge of the lake to the centroid. Multiply these distances by 2. 
+
+```{r, message=FALSE,warning=FALSE}
+# Take just the geometry of the lakes 
+glakes = st_geometry(lakes)
+# Find the centroid
+cntrd = st_centroid(glakes)
+
+# Find distance from edge of lakes to centroid
+cDist = (glakes - cntrd) 
+# Multiply this distance by 2 and add back to centroid 
+glakes2 = cDist * 2 + cntrd
+
+# Find the intersection between Mendota and Monona. We know these are lakes 2 and 3. 
+int = st_intersection(glakes2[2],glakes2[3])
+# What is the size difference between the intersection and Mendota
+st_area(int)/ st_area(glakes2[2])
+```
+**The percent of Mendota that overlaps with Monona is 19.4%**
+
+If you want to double check by plotting 
+```{r, message=FALSE,warning=FALSE}
+# Plot glakes and centroid
+plot(glakes,col='cadetblue')
+plot(cntrd,col='red3',pch=16,add=T)
+# Plot lakes double the size
+plot(glakes2,border='red4',add=T)
+# Plot intersection 
+plot(int,col='red4',add=T)
+```
