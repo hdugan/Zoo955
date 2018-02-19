@@ -85,6 +85,38 @@ spatial extent and resolution
     * A multilayered object, but can only refer to a single file 
     * More effecient processing 
 
-```{r cars}
-summary(cars)
+## Import data
+The raster package makes life easy for importing raster data. I have provided two different storage formats for Lake Mendota NLCD data. 
+
+1) .grd = native grid format for raster package
+2) .tif = geoTIFF
+
+```{r nlcd, message=FALSE, warning=FALSE}
+library(raster,verbose = F)
+nlcd = raster('Data/MendotaNLCD.tif')
+nlcd = raster('Data/MendotaNLCD.grd')
+nlcd
+```
+
+Can explore the data values
+```{r, message=FALSE, warning=FALSE}
+hist(nlcd)
+```
+
+Can plot the data
+```{r, message=FALSE, warning=FALSE}
+plot(nlcd)
+image(nlcd)
+```
+
+Look at the file structure
+```{r, message=FALSE, warning=FALSE}
+str(nlcd)
+```
+
+Notice that there are attributes and a legend
+```{r, message=FALSE, warning=FALSE}
+atts = nlcd@data@attributes[[1]]
+head(atts,20)
+nlcd@legend
 ```
