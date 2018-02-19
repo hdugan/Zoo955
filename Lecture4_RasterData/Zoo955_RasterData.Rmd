@@ -2,7 +2,9 @@
 title: "Zoo955 - Raster Data"
 author: "Hilary Dugan"
 date: "February 20, 2018"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -106,9 +108,10 @@ nlcd = raster('Data/MendotaNLCD.grd')
 nlcd
 ```
 
-What is the resolution? 
+What is the resolution and extent? 
 ```{r, message=FALSE, warning=FALSE}
 res(nlcd)
+extent(nlcd)
 ```
 
 Can explore the data values
@@ -117,14 +120,10 @@ hist(nlcd)
 ```
 
 Can plot the data
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE,fig.width=3}
 plot(nlcd)
 image(nlcd)
-
-plot(nlcd,colNA = 'blue',alpha = 0.5,interpolate = T)
-plot(nlcd,colNA = 'blue',alpha = 0.5,interpolate = F)
 ```
-
 
 
 Look at the file structure
@@ -142,7 +141,6 @@ inMemory(nlcd)
 Can use the `getValues` function. Reads off of disk or memory. 
 `getValues(nlcd)`
 
-
 Notice that there are attributes and a legend
 ```{r, message=FALSE, warning=FALSE}
 atts = nlcd@data@attributes[[1]]
@@ -150,8 +148,47 @@ head(atts,20)
 nlcd@legend
 ```
 
-Can aggregate the data to a lower resolution 
+#### Alter colors 
+All of the NA data is stored as zeros. In the color legend this is black (#000000). Could change to white. 
+```{r, message=FALSE, warning=FALSE,fig.width=3}
+nlcd@legend@colortable[1] = '#ffffff'
+plot(nlcd)
+```
+
+Could just plot agriculture 
+```{r, message=FALSE, warning=FALSE,fig.width=3}
+ag.nlcd = nlcd
+ag.nlcd@legend@colortable = '#ffffff'
+ag.nlcd@legend@colortable[81] = '#228B22'
+ag.nlcd@legend@colortable[82] = '#228B22'
+plot(ag.nlcd)
+```
+
+## Data Counts
 ```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+nlcdVals = freq(nlcd)
+# Sum values, minus zero values 
+total = as.data.frame(nlcdVals) %>% dplyr::filter(value >= 1) %>%
+  summarise_at('count',sum)
+
+# Total impervious counts
+impervious = as.data.frame(nlcdVals) %>% dplyr::filter(value >= 21 & value <= 24) %>%
+  summarise_at('count',sum)
+
+# Total ag counts
+ag = as.data.frame(nlcdVals) %>% dplyr::filter(value >= 81 & value <= 82) %>%
+  summarise_at('count',sum)
+
+perImp = impervious/total
+perImp
+perAg = ag/total
+perAg
+```
+
+## Aggregate data 
+Can aggregate the data to a lower resolution
+```{r, message=FALSE, warning=FALSE,fig.width=3,fig.show='hold'}
 #aggregate from 30x30 to 300*300 (factor of 10)
 nlcd10 <- aggregate(nlcd, fact=10, fun = mean)
 res(nlcd10)
@@ -160,3 +197,7 @@ image(nlcd)
 image(nlcd10)
 ```
 
+## Homework
+
+1) What is the percent of forest in the Mendota catchment? 
+2) What is the area of forest in the Mendota catchment (report in km2)? 
