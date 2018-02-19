@@ -58,6 +58,14 @@ Table: Some common raster file types
   
 You don't need to know the file type details, but you will become familiar with with formats can be read into R
 
+## Spatial resolution 
+Each pixel has the same dimensions and shape. 
+
+In the case of rasters representing Earth's surface, the size of the area on the surface that each pixel covers is known as the __spatial resolution__
+
+The resolution is tyipcally in meters, but can check the CRS
+`res(x)` Gives resolution
+
 ## Using raster data in R
 The R Raster package: https://cran.r-project.org/web/packages/raster/vignettes/Raster.pdf
 
@@ -98,6 +106,11 @@ nlcd = raster('Data/MendotaNLCD.grd')
 nlcd
 ```
 
+What is the resolution? 
+```{r, message=FALSE, warning=FALSE}
+res(nlcd)
+```
+
 Can explore the data values
 ```{r, message=FALSE, warning=FALSE}
 hist(nlcd)
@@ -107,12 +120,28 @@ Can plot the data
 ```{r, message=FALSE, warning=FALSE}
 plot(nlcd)
 image(nlcd)
+
+plot(nlcd,colNA = 'blue',alpha = 0.5,interpolate = T)
+plot(nlcd,colNA = 'blue',alpha = 0.5,interpolate = F)
 ```
+
+
 
 Look at the file structure
 ```{r, message=FALSE, warning=FALSE}
 str(nlcd)
 ```
+
+Notice there are no data store in the `@data`
+```{r, message=FALSE, warning=FALSE}
+nlcd@data@values
+
+inMemory(nlcd)
+```
+
+Can use the `getValues` function. Reads off of disk or memory. 
+`getValues(nlcd)`
+
 
 Notice that there are attributes and a legend
 ```{r, message=FALSE, warning=FALSE}
@@ -120,3 +149,14 @@ atts = nlcd@data@attributes[[1]]
 head(atts,20)
 nlcd@legend
 ```
+
+Can aggregate the data to a lower resolution 
+```{r, message=FALSE, warning=FALSE}
+#aggregate from 30x30 to 300*300 (factor of 10)
+nlcd10 <- aggregate(nlcd, fact=10, fun = mean)
+res(nlcd10)
+par(mfrow=c(1,2),mar=c(2,2,1,1))
+image(nlcd)
+image(nlcd10)
+```
+

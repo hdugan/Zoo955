@@ -138,8 +138,8 @@ $(document).ready(function () {
 <p><code>st_equals</code> = if the shapes are the same, i.e., occupying the same space, will return list of IDs (row number) describing which IDs are equal to one another.</p>
 <p><code>st_covers</code> = This function tests if the geometry of object x covers the geometry of object y. If no points in object y are beyond the boundaries of object x, then object x completely covers object y. <a href="https://postgis.net/docs/ST_Covers.html" class="uri">https://postgis.net/docs/ST_Covers.html</a></p>
 <p><code>st_covered_by</code> = This is essentially the inverse of st_covers. st_covered_by tests if the geometry of object x is covered by the geomertry of object y. If no points in object x are beyond the boundaries of object y, then object x is completely covered by y (and y completely covers x). st_covers(x,y) will produce the same result as st_covered_by(y,x).</p>
-<p><code>st_equals_exact</code> =</p>
-<p><code>st_is_within_distance</code> =</p>
+<p><code>st_equals_exact</code> = returns a logical T/F response for two geometries of the same type and with vertices having corresponding indices within a specified tolerance.</p>
+<p><code>st_is_within_distance</code> = returns a sparse matrix of object IDs that are within some specified distance of a given object.</p>
 <p><code>st_buffer</code> = create a new polygon that all coordinates are X distance away from the edge of another polygon, line or point. The buffer can extend outward (+) or inward (-) of a polygon.</p>
 <p><code>st_boundary</code> = this returns the geometry, which is the combinatorial boundary of the given geometric object. For polygons, this is simply the outline. For points, it seems to connect points in the order (example) without closing them</p>
 <p><code>st_convexhull</code> = returns the smallest geometry that cantains all geometries for a given shape. It’s like putting a rubber band around a shape.</p>

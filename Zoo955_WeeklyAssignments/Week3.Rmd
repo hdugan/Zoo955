@@ -3,8 +3,8 @@ title: "Zoo955 - Week 3"
 author: "Hilary Dugan"
 date: "2/13/2018"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include = FALSE}
@@ -34,9 +34,9 @@ Define functions from the `sf` package. Good resource: https://en.wikipedia.org/
 
 `st_covered_by` = This is essentially the inverse of st_covers. st_covered_by tests if the geometry of object x is covered by the geomertry of object y. If no points in object x are beyond the boundaries of object y, then object x is completely covered by y (and y completely covers x). st_covers(x,y) will produce the same result as st_covered_by(y,x).
 
-`st_equals_exact` =
+`st_equals_exact` = returns a logical T/F response for two geometries of the same type and with vertices having corresponding indices within a specified tolerance.
 
-`st_is_within_distance` =
+`st_is_within_distance` = returns a sparse matrix of object IDs that are within some specified distance of a given object.
 
 `st_buffer` = create a new polygon that all coordinates are X distance away from the edge of another polygon, line or point. The buffer can extend outward (+) or inward (-) of a polygon.
 
