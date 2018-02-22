@@ -1,0 +1,97 @@
+---
+title: "ZOO955 - RasterBricks"
+author: "Hilary Dugan"
+date: "2/22/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Raster Bricks ##
+
+
+#### Climate data ####
+http://berkeleyearth.org/data/
+
+#### Gridded data
+_Datasets are also provided in a gridded NetCDF format. Two types of grids are provided, a grid based on dividing the Earth into 15984 equal-area grid cells and a latitude-longitude grid. The equal area grid is the primary data format used in most of our analyses and provides generally smaller files; however, that format may be less convenient for many users._
+
+Will use: 
+* Global surface temperatures: BEST: Berkeley Earth Surface Temperatures
+* Monthly Land Average Temperature (TAVG; 1753 - Recent) (200 Mb)
+
+#### Read data
+In this example we're using a netcdf file (.nc). These can store multiple variables. If you read in data, you may get a warning like 
+`"Warning message:In .varName(nc, varname, warn = warn) : varname used is: temperature`
+`If that is not correct, you can set it to one of: temperature, climatology"`
+
+Luckily, it will tell you the variabiles present! In this case, there in only one variable (temperature)
+
+```{r,message=F,warning=F}
+library(raster,verbose = F)
+r = raster('Data/WI_TAVG_LatLong1.nc')
+r
+```
+Note the multiple bands `band: 1 (of  3200  bands)`
+
+Can choose band. 
+```{r,message=F,warning=F}
+r = raster('Data/WI_TAVG_LatLong1.nc', band = 10)
+r
+```
+
+Or, can import all the bands, using `brick`
+```{r,message=F,warning=F}
+br = brick('Data/WI_TAVG_LatLong1.nc') 
+br
+```
+You can see the class and dimensions have changed:
+
+`class       : RasterBrick`
+`dimensions  : 5, 6, 30, 3200  (nrow, ncol, ncell, nlayers)`
+
+#### Extracting data 
+We know that the raster brick has 3200 layers. We also know the min/max values are 
+`1750.04166666667, 2016.625 (min, max)`
+
+From this, and from the metadata, we know this data is monthly temperature. Can double check with 
+```{r,message=F,warning=F}
+# Max year minus min year. Multiplied by 12 months
+(2016.625-1750.041666667)*12
+```
+
+If we want to extract data, we can just like a list
+```{r,message=F,warning=F}
+fifth.month = br[[5]] 
+fifth.month # This is now a raster layer
+```
+
+Extract data 
+```{r,message=F,warning=F}
+vals = getValues(fifth.month)
+vals
+```
+
+But where are these values located in space? Can use the function `xyFromCell`. 
+
+_These functions get coordinates of the center of raster cells for a row, column, or cell number of a Raster* object._
+
+We know there are 30 cells, but can also use the function `ncell`
+```{r,message=F,warning=F}
+coord <- xyFromCell(fifth.month,1:ncell(fifth.month))
+coord
+```
+Can see that it's a 1 deg resolution. But we already know that too. 
+
+Which cell is closest to Lake Mendota? 
+```{r,message=F,warning=F}
+lat = 43.1
+long = -89.4
+indx = which(abs(coord[,1] - long) <= 0.5 & abs(coord[,2] - lat) <= 0.5)
+indx 
+```
+Cell 22 is closest to Lake Menota. `[22,] -89.5 43.5`
+
+I'm sure there are spatial ways to do this as well. Using functions like `gDistance` in the `rgeos` package
