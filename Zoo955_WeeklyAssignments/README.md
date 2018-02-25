@@ -24,11 +24,13 @@ Preferably choose ones that you don't already know.
 3) [This question is considerably more difficult. Try your best, but don't spend more than 30 minutes on this.] Increase the size of the lakes by 2x. What is the percent of Mendota that overlaps with Monona? 
 
 WEEK 4:
+
 Using the NLCD data from the Mendota watershed:
 1) What is the percent of forest in the Mendota catchment? 
 2) What is the area of forest in the Mendota catchment (report in km2)? 
 
 WEEK 5:
+
 Use the 'Data/WI_CAVG_LatLong1.nc' file. In this lecture we dealt with the "temperature" variable. This file is the "climatology" variable. 
 
 Find the metadata for these dataset. http://berkeleyearth.org/data/. We are using *Gridded Data*. *Monthly Land. Average Temperature (TAVG; 1753 – Recent)*. 
