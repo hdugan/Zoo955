@@ -2,7 +2,9 @@
 title: "ZOO955 - RasterBricks"
 author: "Hilary Dugan"
 date: "2/22/2018"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
