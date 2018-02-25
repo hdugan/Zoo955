@@ -1,0 +1,51 @@
+---
+title: "Zoo955 - Week 4"
+author: "Hilary Dugan"
+date: "2/26/2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1) What is the percent of forest in the Mendota catchment? 
+Load raster
+```{r nlcd, message=FALSE, warning=FALSE}
+library(raster,verbose = F)
+nlcd = raster('../Lecture4_RasterData/Data/MendotaNLCD.grd')
+```
+
+Get frequency counts
+```{r, message=FALSE, warning=FALSE}
+nlcdVals = freq(nlcd)
+# Sum values, minus zero values 
+total = as.data.frame(nlcdVals) %>% dplyr::filter(value >= 1) %>%
+  summarise_at('count',sum)
+
+# Total forest counts
+forest = as.data.frame(nlcdVals) %>% dplyr::filter(value >= 41 & value <= 43) %>%
+  summarise_at('count',sum)
+
+# Percent forest
+perF = forest/total
+perF
+```
+The % forest in Mendota watershed is ~ 4.4% (closer to 4.7% if you don't include Lake Mendota)
+
+## 2) What is the area of forest in the Mendota catchment (report in km2)? 
+Each cell is 30x30 m. 
+
+Therefore each cell is 900 m2. We know that our `forest` total  = 29347. 
+
+```{r counts, message=FALSE, warning=FALSE}
+# multiply counts by cell size and then convert to km2
+forest * 900 / 1000000
+```
+
+The area of forest in Mendota watershed is 26.4 km2
+
+
+
