@@ -3,8 +3,8 @@ title: "Zoo955 - Week 3"
 author: "Hilary Dugan"
 date: "2/13/2018"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include = FALSE}
@@ -46,7 +46,7 @@ Define functions from the `sf` package. Good resource: https://en.wikipedia.org/
 
 `st_union_cascaded` = Doesn't exist anymore. _cascaded refered to a new, at the time, algorithm that sped up st_union
 
-`st_simplify` =
+`st_simplify` = is a way to scale down the sizes of vector polygons, usually for the production of smaller maps or to conserve memory and disk space, which is especially useful for interactive maps. It reduces the number of vertices in the polygon
 
 `st_triangulate` = connects 3D cloud of points with triangles to create a connected surface called a TIN, it's often used in analysis of topography
 

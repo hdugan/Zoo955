@@ -144,7 +144,7 @@ $(document).ready(function () {
 <p><code>st_boundary</code> = this returns the geometry, which is the combinatorial boundary of the given geometric object. For polygons, this is simply the outline. For points, it seems to connect points in the order (example) without closing them</p>
 <p><code>st_convexhull</code> = returns the smallest geometry that cantains all geometries for a given shape. It’s like putting a rubber band around a shape.</p>
 <p><code>st_union_cascaded</code> = Doesn’t exist anymore. _cascaded refered to a new, at the time, algorithm that sped up st_union</p>
-<p><code>st_simplify</code> =</p>
+<p><code>st_simplify</code> = is a way to scale down the sizes of vector polygons, usually for the production of smaller maps or to conserve memory and disk space, which is especially useful for interactive maps. It reduces the number of vertices in the polygon</p>
 <p><code>st_triangulate</code> = connects 3D cloud of points with triangles to create a connected surface called a TIN, it’s often used in analysis of topography</p>
 <p><code>st_polygonize</code> = creates a multipolygon feature from lines of an input geometry. If the input is lines, it will create polygons only if enclosed by overlapping vertices.</p>
 <p><code>st_centroid</code> =</p>
