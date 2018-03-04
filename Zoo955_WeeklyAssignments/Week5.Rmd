@@ -1,0 +1,42 @@
+---
+title: "Zoo955 - Week 5"
+author: "Hilary Dugan"
+date: "3/05/2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Use the 'Data/WI_CAVG_LatLong1.nc' file. In this lecture we dealt with the "temperature" variable. This file is the "climatology" variable. 
+
+Find the metadata for these dataset. http://berkeleyearth.org/data/. We are using *Gridded Data*. *Monthly Land. Average Temperature (TAVG; 1753 – Recent)*. 
+
+## 1) The climatology variable is a monthly average for each cell. What years does this average represent? 
+January 1951 to December 1980 reported in degrees C
+
+## 2) Plot the August averages for Wisconsin. 
+```{r,message=F,warning=F}
+library(raster)
+br = brick('../Lecture5_RasterBricks/Data/WI_CAVG_LatLong1.nc') 
+august = br[[8]] 
+plot(august)
+```
+
+## 3) Extract the averages for the cell over Lake Mendota. Plot the monthly temperature averages. 
+```{r,message=F,warning=F}
+# Option 1
+mendota = data.frame(lat = 43.1, long = -89.4)
+coordinates(mendota) = ~long+lat
+menTemp = extract(br,y = mendota)
+plot(menTemp[1,],pch=16,ylab = 'Temperature (*C)',xlab = 'Month')
+```
+
+## 4) What is the August average for Lake Mendota? 
+```{r,message=F,warning=F}
+menTemp[1,8]
+```
+The august average temperature is 20.2
