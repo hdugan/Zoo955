@@ -1,0 +1,52 @@
+---
+title: "ZOO955 - Overlays"
+author: "Hilary Dugan"
+date: "2/22/2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Vector and Raster Data ##
+It is common that you will have to use both vector and raster data in your work. Today we'll explore some common techniques for working with multiple data types. 
+
+#### Lake point data ####
+Read in lake point data from .csv 
+```{r,message=F,warning=F,fig.width=3,fig.height=3}
+library(sp)
+library(raster)
+library(rgdal)
+lakes = read.csv('Data/nlakes.csv',stringsAsFactors = F)
+coordinates(lakes) = ~Longitude+Latitude
+crs(lakes) <- CRS("+proj=longlat +datum=WGS84")
+plot(lakes,cex=2)
+text(lakes,labels = lakes$Lake,cex=0.8)
+```
+
+#### Counties data ####
+Read in lake point data from .csv 
+```{r,message=F,warning=F}
+library(rgdal)
+counties = readOGR('C:/Users/hdugan/Dropbox/RandomR/GIS_Wisconsin/County_Boundaries_24K/County_Boundaries_24K.shp',layer='County_Boundaries_24K')
+vilas = counties[counties@data$COUNTY_NAM == 'Vilas',]
+plot(vilas)
+```
+
+#### National hydrography shapefiles ####
+Read in lake point data from .csv 
+```{r,message=F,warning=F}
+library(rgdal)
+vilasNHD = readOGR('Data/vilasNHD.shp',layer = 'vilasNHD')
+plot(vilasNHD)
+```
+
+#### NLCD raster data ####
+Read in lake point data from .csv 
+```{r,message=F,warning=F}
+library(rgdal)
+nlcd = raster('Data/vilasNLCD.grd')
+```
