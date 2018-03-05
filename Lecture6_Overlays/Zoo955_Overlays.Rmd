@@ -30,7 +30,6 @@ text(lakes,labels = lakes$Lake,cex=0.8)
 #### Counties data ####
 Read in lake point data from .csv 
 ```{r,message=F,warning=F}
-library(rgdal)
 counties = readOGR('C:/Users/hdugan/Dropbox/RandomR/GIS_Wisconsin/County_Boundaries_24K/County_Boundaries_24K.shp',layer='County_Boundaries_24K')
 vilas = counties[counties@data$COUNTY_NAM == 'Vilas',]
 plot(vilas)
@@ -38,7 +37,7 @@ plot(vilas)
 
 #### National hydrography shapefiles ####
 Read in lake point data from .csv 
-```{r,message=F,warning=F}
+```{r,message=F,warning=F,fig.keep='last'}
 library(rgdal)
 vilasNHD = readOGR('Data/vilasNHD.shp',layer = 'vilasNHD')
 plot(vilasNHD)
@@ -46,7 +45,82 @@ plot(vilasNHD)
 
 #### NLCD raster data ####
 Read in lake point data from .csv 
-```{r,message=F,warning=F}
-library(rgdal)
+```{r,message=F,warning=F,fig.keep='last'}
 nlcd = raster('Data/vilasNLCD.grd')
+plot(nlcd)
 ```
+
+### Cropping rasters ###
+You can only crop rasters to be square. So the above raster is already cropped to vilas county. However, if we wanted to be sure:
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+nlcdvilas = crop(nlcd,vilas)
+# Need to make sure they have identical CRS! 
+vilas = spTransform(vilas,crs(nlcd)) # transform CRS (usually easier to transform the vector data)
+nlcdvilas = crop(nlcd,vilas) # crop the raster the extent of the county
+plot(nlcdvilas)
+plot(vilas,add = T,lwd=2)
+```
+
+### Mask raster ###
+# now use the mask function
+Instead we can `mask` the raster. 
+
+`Create a new Raster* object that has the same values as x, except for the cells that are NA (or other maskvalue) in a 'mask'.`
+
+# ```{r,message=F,warning=F,error=T,fig.keep='last'}
+# # now use the mask function
+# nlcdvilas <- mask(nlcd, vilas)
+# plot(nlcdvilas)
+# ```
+
+### Check if NHD matches up with NLCD ###
+
+# ```{r,message=F,warning=F,error=T,fig.keep='last'}
+# vilas.crs = spTransform(vilasNHD,crs(nlcd))
+# nlcd.nhd = mask(nlcd,vilas.crs)
+# plot(nlcd.nhd)
+# ```
+Looks like we're dealing with an island issue 
+
+
+### Extract northern study lakes ###
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+identicalCRS(lakes,vilasNHD)
+lakes.crs = spTransform(lakes,crs(vilasNHD))
+lakesNHD = crop(vilasNHD,lakes.crs)
+plot(lakesNHD)
+```
+
+Well that didn't work. This just cropped to the extent. 
+
+Reserve `crop` for raster data sets. Instead we can use `over`. 
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+b = over(vilasNHD,lakes.crs)
+nLakes = vilasNHD[which(!is.na(b)),]
+plot(nLakes)
+```
+
+### Buffers around study lakes ###
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+nLakes.m = spTransform(nLakes,crs(nlcd))
+buff500 = gBuffer(nLakes.m,width = 100)
+plot(buff500)
+plot(nLakes.m,add=T)
+```
+
+Extract nlcd data 
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+a = crop(nlcd,buff500)
+a = mask(a,buff500)
+```
+
+Can ask questions like:
+
+* What is the percent wetlands around these five lakes?
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+afreq = freq(a)
+perWetlands = 100 * sum(afreq[11:12,2])/sum(afreq[1:12,2])
+perWetlands
+```
+
+
