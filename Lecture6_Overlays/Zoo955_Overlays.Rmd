@@ -20,6 +20,7 @@ Read in lake point data from .csv
 library(sp)
 library(raster)
 library(rgdal)
+library(rgeos)
 lakes = read.csv('Data/nlakes.csv',stringsAsFactors = F)
 coordinates(lakes) = ~Longitude+Latitude
 crs(lakes) <- CRS("+proj=longlat +datum=WGS84")
@@ -105,13 +106,14 @@ plot(nLakes)
 nLakes.m = spTransform(nLakes,crs(nlcd))
 buff500 = gBuffer(nLakes.m,width = 100)
 plot(buff500)
-plot(nLakes.m,add=T)
+plot(nLakes.m,add=T,col='lightblue4')
 ```
 
 Extract nlcd data 
 ```{r,message=F,warning=F,error=T,fig.keep='last'}
 a = crop(nlcd,buff500)
 a = mask(a,buff500)
+plot(a)
 ```
 
 Can ask questions like:
@@ -119,8 +121,82 @@ Can ask questions like:
 * What is the percent wetlands around these five lakes?
 ```{r,message=F,warning=F,error=T,fig.keep='last'}
 afreq = freq(a)
-perWetlands = 100 * sum(afreq[11:12,2])/sum(afreq[1:12,2])
+afreq
+perWetlands = 100 * sum(afreq[9:10,2])/sum(afreq[1:10,2])
 perWetlands
 ```
+
+### Convert polygons to raster ###
+Things to make note of:
+
+* CRS - Units and area are important!
+* Grid size
+
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+# Albers Equal Area Conic
+AEA <- CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 
+                                 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs") 
+# Transform projection of NHD 
+nhdAEA = spTransform(vilasNHD,AEA)
+
+
+# Length and width of area in km 
+width = (extent(nhdAEA)[4] - extent(nhdAEA)[3])/1000
+length = (extent(nhdAEA)[2] - extent(nhdAEA)[1])/1000
+
+# Create an empty raster 
+r1 = raster(ncol=width*10, nrow=length*10) #approximately 100 m grid
+r1
+extent(r1) = extent(nhdAEA)
+r1
+```
+
+We now have an empty raster that has the desired geometry 
+
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+r2 = rasterize(nhdAEA,r1,field = 1, background = 0)
+r2
+plot(r2)
+# Reclassify raster where all zero values are NA.
+class1 <- reclassify(r2, cbind(0, NA))
+class1
+```
+
+What would it look like with a 1km grid cell? 
+
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+r1k = raster(ncol=width, nrow=length) #approximately 1 km grid
+extent(r1k) = extent(nhdAEA)
+r2k = rasterize(nhdAEA,r1k,field = 1, background = 0)
+plot(r2k)
+```
+
+Can change the function of how cells are counted. 
+
+`To determine what values to assign to cells that are covered by multiple spatial features.`
+`You can use functions such as min, max, or mean, or one of the following character values:`
+`'first', 'last', 'count'. The default value is 'last'.`
+
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+r2kc = rasterize(nhdAEA,r1k,field = 1,background = 0, fun=function(x,...){length(x)})
+plot(r2kc)
+```
+Note:
+
+`You can also pass multiple functions using a statement like`
+`fun=function(x, ...) c(length(x),mean(x)),` 
+`in which case the returned object is a RasterBrick (multiple layers).`
+
+
+## Homework ##
+
+NHD data for Wisconsin:
+http://prd-tnm.s3-website-us-west-2.amazonaws.com/?prefix=StagedProducts/Hydrography/NHD/State/HighResolution/Shape/
+
+
+1) Calculate the percent water in each county in Wisconsin using the 2011 NLCD. 
+2) Calculate the percent water in each county using the NHD. 
+
+
 
 
