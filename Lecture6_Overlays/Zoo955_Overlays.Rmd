@@ -63,25 +63,25 @@ plot(vilas,add = T,lwd=2)
 ```
 
 ### Mask raster ###
-# now use the mask function
 Instead we can `mask` the raster. 
 
-`Create a new Raster* object that has the same values as x, except for the cells that are NA (or other maskvalue) in a 'mask'.`
+`Create a new Raster* object that has the same values as x,`
+`except for the cells that are NA (or other maskvalue) in a 'mask'.`
 
-# ```{r,message=F,warning=F,error=T,fig.keep='last'}
-# # now use the mask function
-# nlcdvilas <- mask(nlcd, vilas)
-# plot(nlcdvilas)
-# ```
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+#now use the mask function
+nlcdvilas <- mask(nlcd, vilas)
+plot(nlcdvilas)
+```
 
 ### Check if NHD matches up with NLCD ###
-
-# ```{r,message=F,warning=F,error=T,fig.keep='last'}
-# vilas.crs = spTransform(vilasNHD,crs(nlcd))
-# nlcd.nhd = mask(nlcd,vilas.crs)
-# plot(nlcd.nhd)
-# ```
 Looks like we're dealing with an island issue 
+```{r,message=F,warning=F,error=T,fig.keep='last'}
+vilas.crs = spTransform(vilasNHD,crs(nlcd))
+nlcd.nhd = mask(nlcd,vilas.crs)
+plot(nlcd.nhd)
+```
+
 
 
 ### Extract northern study lakes ###
@@ -109,7 +109,7 @@ plot(buff500)
 plot(nLakes.m,add=T,col='lightblue4')
 ```
 
-Extract nlcd data 
+### Extract nlcd data 
 ```{r,message=F,warning=F,error=T,fig.keep='last'}
 a = crop(nlcd,buff500)
 a = mask(a,buff500)
