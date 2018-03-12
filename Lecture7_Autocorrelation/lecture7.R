@@ -29,8 +29,6 @@ w <- poly2nb(counties, row.names= counties$OBJECTID)
 class(w)
 summary(w)
 
-
-
 # Plot the links between the polygons
 plot(counties)
 plot(w, xy, col='red4', add=TRUE)
@@ -54,6 +52,8 @@ wm <- nb2mat(w, style='B')
 wm
 
 nb2mat(d, style='B')
+
+
 # Compute Moran's I
 # To do this we need to create a ‘listw’ type spatial weights object (instead of the matrix we used above). 
 # To get the same value as above we use “style=’B’” to use binary (TRUE/FALSE) distance weights.

@@ -3,8 +3,8 @@ title: "ZOO955 - Autocorrelation"
 author: "Hilary Dugan"
 date: "3/13/2018"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-### Tobler’s first law of geography ### 
+## Tobler’s first law of geography 
 _“Everything is related to everything else, but near things are more related than distant things”._
 
 Often we can use autocorrelation as prediction (ie. interpolation [next week]). 
@@ -60,7 +60,7 @@ https://docs.aurin.org.au/wp-content/uploads/sites/2/2014/09/Spatial_Autocorrela
 * Must use spatial statistical inference tests               
 
 
-### How do we detect spatial autocorrelation? 
+## How do we detect spatial autocorrelation? 
 Basically turning autocorrelation (repeated correlations) to two dimensions. 
 
 To accomplish this, a __spatial weights matrix__ is computed. 
@@ -87,7 +87,7 @@ The weight matrix can be specified in many ways:
 Other weight matrices are possible.  The weight matrix is often row-standardized, i.e., all the weights in a row sum to one.  Note that the actual values in the weight matrix are up to the researcher.
 
 
-### Moran’s I ###
+### Moran’s I 
 Moran's I measures spatial autocorrelation based on both feature locations and feature values simultaneously. 
 Given a set of features and an associated attribute, it evaluates whether the pattern expressed is clustered, dispersed, or random. 
 
@@ -131,7 +131,7 @@ points(xy, cex=2, pch=20)
 * Neighbors can be based on contiguity, distance, or the k nearest neighbors may be defined (other options as well).
 * To find adjacent polygons, use package `spdep`
 
-### Adjacent polygons 
+#### Adjacent polygons 
 ```{r,message=F,warning=F,fig.width=7,fig.height=5}
 library(spdep)
 # Construct neighbours list from polygon list
@@ -144,34 +144,151 @@ plot(cSimp, main='Adjacent polygons')
 plot(w, xy, col='red4', add=TRUE, lwd=2)
 ```
 
-### k-nearest neighbors 
+#### k-nearest neighbors 
 ```{r,message=F,warning=F,fig.width=7,fig.height=5}
-par(mfrow=c(1,2),mar=c(0,0,0,0))
+par(mfrow=c(1,2),mar=c(0,0,2,0))
 # 4 neighbors
 k = knearneigh(xy, k = 3)
-k = knn2nb(k, row.names = counties$OBJECTID)
+k4 = knn2nb(k, row.names = counties$OBJECTID)
 plot(cSimp, main='k nearest neighbors = 4')
-plot(k, xy, col='red4', add=TRUE, lwd=2)
+plot(k4, xy, col='red4', add=TRUE, lwd=2)
 
 # 2 neighbors
 k = knearneigh(xy, k = 2)
-k = knn2nb(k, row.names = counties$OBJECTID)
+k2 = knn2nb(k, row.names = counties$OBJECTID)
 plot(cSimp, main='k nearest neighbors = 2')
-plot(k, xy, col='red4', add=TRUE, lwd=2)
+plot(k2, xy, col='red4', add=TRUE, lwd=2)
 ```
 
-### Distance matrix 
+#### Distance matrix 
 ```{r,message=F,warning=F,fig.width=7,fig.height=5}
-par(mfrow=c(1,2),mar=c(0,0,0,0))
+par(mfrow=c(1,2),mar=c(0,0,2,0))
 # Distance = 50 km
-d =  dnearneigh(xy, d1 = 0, d2 = 50000, row.names = counties$OBJECTID)
+d50 =  dnearneigh(xy, d1 = 0, d2 = 50000, row.names = counties$OBJECTID)
 plot(cSimp, main='neighbors, distance = 50km')
-plot(d, xy, col='red4', add=TRUE, lwd=2)
-d =  dnearneigh(xy, d1 = 0, d2 = 100000, row.names = counties$OBJECTID)
+plot(d50, xy, col='red4', add=TRUE, lwd=2)
+
+# Distance = 100 km
+d100 =  dnearneigh(xy, d1 = 0, d2 = 100000, row.names = counties$OBJECTID)
 plot(cSimp, main='neighbors, distance = 100km')
-plot(d, xy, col='red4', add=TRUE, lwd=2)
+plot(d100, xy, col='red4', add=TRUE, lwd=2)
 ```
+
+### Transform w into a spatial weights matrix. 
+A spatial weights matrix reflects the intensity of the geographic relationship between observations
+
+```{r,message=F,warning=F,fig.width=7,fig.height=5}
+wm.w <- nb2mat(w, style='B')
+wm.w[1:10,1:10]
+```
+
+
+### Compute Moran's I
+To do this we need to create a ‘listw’ type spatial weights object (instead of the matrix we used above) 
+To get the same value as above we use “style=’B’” to use binary (TRUE/FALSE) distance weights.
+```{r,message=F,warning=F,fig.width=7,fig.height=5}
+wm.w <-  nb2listw(w, style='B')
+wm.w
+
+wm.k4 <- nb2listw(k4, style='B')
+wm.k2 <- nb2listw(k2, style='B')
+
+wm.d50 <- nb2listw(d50, style='B',zero.policy = T)
+wm.d100 <- nb2listw(d100, style='B',zero.policy = T)
+```
+
+#### Now we can use the moran function.
+
+* x	 = a numeric vector the same length as the neighbours list in listw
+* listw	= a listw object created for example by nb2listw
+* n	= number of zones
+* S0	= global sum of weights
+```{r,message=F,warning=F,results=F,fig.width=7,fig.height=5}
+moran(x = counties$water,listw = wm.w, n=length(wm.w$neighbours), S0=Szero(wm.w))
+moran(x = counties$water,listw = wm.k4, n=length(wm.k4$neighbours), S0=Szero(wm.k4))
+moran(x = counties$water,listw = wm.k2, n=length(wm.k2$neighbours), S0=Szero(wm.k2))
+moran(x = counties$water,listw = wm.d50, n=length(wm.d50$neighbours), S0=Szero(wm.d50),zero.policy = T)
+moran(x = counties$water,listw = wm.d100, n=length(wm.d100$neighbours), S0=Szero(wm.d100),zero.policy = T)
+```
+
+-----------------------------
+Weight Matrix      Morans I  
+------------------ ---------- 
+Adjacent            0.16
+
+K-nearest = 4       0.30
+
+K-nearest = 2       0.48
+
+Distance = 50km     0.27
+
+Distance = 100km    0.003
+-----------------------------
+
+The math behind the Global Moran's I statistic is shown above 
+
+* Computes the mean and variance for the attribute being evaluated. 
+* For each value, it subtracts the mean, creating a deviation from the mean. 
+* Deviation values for all neighboring features (created via methods above) are multiplied together to create a cross-product. 
+    * When values for neighboring features are either both larger than the mean or both smaller than the mean, the cross-product will be positive.
+    * If the values in the dataset tend to cluster spatially (high values cluster near other high values; low values cluster near other low values), the Moran's Index will be positive. 
+    
+* The more neighbors an area has, the higher likelihood the cross-product will be close to zero
+
+#### Test for significance 
+First analytically, using linear regression based logic and assumptions.
+```{r,message=F,warning=F,results=F,fig.width=7,fig.height=5}
+moran.test(counties$water, wm.w, randomisation=FALSE)
+```
+__p-value = 0.00733__
+
+#### But should probably use Monte Carlo simulation instead.
+Values are randomly assigned to the polygons, and the Moran’s I is computed.
+This is repeated several times to establish a distribution of expected values.
+The observed value of Moran’s I is then compared with the simulated distribution to see how likely
+it is that the observed values could be considered a random draw.
+
+```{r,message=F,warning=F,results=F,fig.width=7,fig.height=5}
+moran.mc(counties$water, wm.w, nsim=99)
+```
+__p-value = 0.01__
+
+```{r,message=F,warning=F,results=F,fig.width=7,fig.height=5}
+moran.test(counties$water, wm.w, randomisation=FALSE)
+moran.test(counties$water, wm.k4, randomisation=FALSE)
+moran.test(counties$water, wm.k2, randomisation=FALSE)
+moran.test(counties$water, wm.d50, randomisation=FALSE,zero.policy = T)
+moran.test(counties$water, wm.d100, randomisation=FALSE)
+
+moran.mc(counties$water, wm.w, nsim=999)
+moran.mc(counties$water, wm.k4, nsim=999)
+moran.mc(counties$water, wm.k2, nsim=999)
+moran.mc(counties$water, wm.d50, nsim=999,zero.policy = T)
+moran.mc(counties$water, wm.d100, nsim=999)
+```
+-------------------------------------------------------
+Weight Matrix      Morans I   p-Value (LR) p-Value (MC)
+------------------ ---------- ------------ ------------
+Adjacent            0.16       0.00733       0.018
+
+K-nearest = 4       0.30       0.0001883     0.003
+
+K-nearest = 2       0.48       2.405e-06     0.001
+
+Distance = 50km     0.27       0.002334      0.009
+
+Distance = 100km    0.003      0.3517        0.311
+------------------------------------------------------
+
+Null hypothesis = attribute being analyzed is randomly distributed among the features in your study area
+
+### Discussion 
+How would you expect the spatial autocorrelation of %water to change as you decreased or increased the resolution 
+of the underlying raster data? 
 
 ### Homework
 
-1) Find an example of negative spatial autocorrelation in ecology 
+1) Find an example of negative spatial autocorrelation in ecology
+2) Use the county and NLCD datasets for WI. Compute Moran's I and p-value (using adjacent polygons) for:
+    * Percent developed
+    * Percent forest
