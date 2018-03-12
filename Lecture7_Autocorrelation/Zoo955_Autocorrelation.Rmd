@@ -1,5 +1,5 @@
 ---
-title: "ZOO955 - Overlays"
+title: "ZOO955 - Autocorrelation"
 author: "Hilary Dugan"
 date: "3/13/2018"
 output:
@@ -13,44 +13,78 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ### Tobler’s first law of geography ### 
-“Everything is related to everything else, but near things are more related than distant things”.
-Use autocorrelation as prediction (ie. interpolation!). Can ecology can beat the null model of autocorrelation?
+_“Everything is related to everything else, but near things are more related than distant things”._
 
-#### References ####
+Often we can use autocorrelation as prediction (ie. interpolation [next week]). 
+
+* But it is also an important component of mechanistic modeling. 
+* Can ecology beat the null model of autocorrelation?
+
+### References 
 * http://rspatial.org/analysis/rst/3-spauto.html
 * http://www.bias-project.org.uk/ASDARcourse/unit6_slides.pdf
 * http://www.stat.purdue.edu/~bacraig/SCS/Spatial%20Correlation%20new.doc
 * https://dynamicecology.wordpress.com/2013/10/02/autocorrelation-friend-or-foe/comment-page-1/
 
+### What is autocorrelation? 
+__Autocorrelation__ refers to the correlation of a time series with its own past and future values
 
-Detecting autocorrelation
-Describing and visualizing autocorrelation
-Adjusting for or predicting with autocorrelation
+```{r,message=F,warning=F,fig.width=7,fig.height=4}
+library(dplyr)
+par(mar=c(3,3,1,1),mgp=c(1.5,0.5,0))
+
+met = read.csv('Data/arbMet.csv',stringsAsFactors = F)
+met = met %>% mutate(DATE = as.Date(DATE))
+met$tmax = approx(met$DATE,met$TMAX, xout = met$DATE, method="linear")[[2]] # Fill in gaps linearly 
+met[is.na(met$PRCP),]$PRCP = 0 # replace NA precip events with zero 
+
+plot(met$DATE,met$TMAX,type='l',ylab='Max Temperature', xlab = 'Date')
+acf(met$tmax,lag.max = 100) # auto-correlation function
+acf(met$PRCP,lag.max = 100)
+``` 
+
+__Spatial autocorrelation__ measures the correlation of a variable with itself through space. 
+
+* Spatial autocorrelation can be positive or negative. 
+* Positive spatial autocorrelation occurs when similar values occur near one another. 
+* Negative spatial autocorrelation occurs when dissimilar values occur near one another.
+
+![](Figures/Spatial_Autocorrelation.jpg) 
+https://docs.aurin.org.au/wp-content/uploads/sites/2/2014/09/Spatial_Autocorrelation.jpg
+
+### Why should we care about autocorrelation? 
+* Autocorrelation invalidates most traditional statistical inference tests
+* If SA exists, then the results of standard statistical inference tests  may be incorrect
+    * Correlation coefficients appear to be bigger than they really are
+    * They are more likely to be found “statistically significant” (p-value inflation)
+* Must use spatial statistical inference tests               
 
 
-### Spatial weights ###
-* Creating spatial weights is a necessary step in using areal
-data, perhaps just to check that there is no remaining spatial
-patterning in residuals
+### How do we detect spatial autocorrelation? 
+Basically turning autocorrelation (repeated correlations) to two dimensions. 
+
+To accomplish this, a __spatial weights matrix__ is computed. 
+
+### Spatial Matrix ###
 * `spdep` package
 * The first step is to determine the sets of neighbours for each
 observation, the second to assign weights to each neighbour
 relationship
 
 ### Weight Matrix ###
+To assess spatial autocorrelation
 
-
-To assess spatial autocorrelation, one first needs to define what is meant by two observations being close together, i.e., a distance measure must be determined.  These distances are presented in weight matrix, which defines the relationships between locations where measurements were made.  If data are collected at    locations, then the weight matrix will be  with zeroes on the diagonal.
+1) What is meant by two observations being close together
+    * i.e., a distance measure must be determined. 
+2) These distances are presented in weight matrix, which defines the relationships between locations where measurements were made.  
 
 The weight matrix can be specified in many ways:
-
-"	The weight for any two different locations is a constant.
-"	All observations within a specified distance have a fixed weight.
-"	K nearest neighbors have a fixed weight, and all others are zero.
-"	Weight is proportional to inverse distance, inverse distance squared, or inverse distance up to a specified distance.
+* The weight for any two different locations is a constant.
+* All observations within a specified distance have a fixed weight.
+* K nearest neighbors have a fixed weight, and all others are zero.
+* Weight is proportional to inverse distance, inverse distance squared, or inverse distance up to a specified distance.
 
 Other weight matrices are possible.  The weight matrix is often row-standardized, i.e., all the weights in a row sum to one.  Note that the actual values in the weight matrix are up to the researcher.
-
 
 
 ### Moran’s I ###
@@ -65,29 +99,79 @@ interest, and adjusted for the spatial weights used:
 
 where `yi` is the i-th observation, `¯y` is the mean of the variable of
 interest, and `wij` is the spatial weight of the link between `i` and `j`.
+
 Centering on the mean is equivalent to asserting that the correct
 model has a constant mean, and that any remaining patterning
 after centering is caused by the spatial relationships encoded in the
 spatial weights
 
-
-
-## Wy is it important? ##
-It invalidates most traditional statistical inference tests
-If SA exists, then the results of standard statistical inference tests  may be incorrect   (wrong!)
-We need to use spatial statistical inference tests               
-
-If Spatial Autocorrelation exists:
-Correlation coefficients appear to be bigger than they really are, and
-They are more likely to be found “statistically significant”
-
-#### Lake point data ####
-Read in lake point data from .csv 
-```{r,message=F,warning=F,fig.width=3,fig.height=3}
-library(sp)
-library(raster)
+## Compute spatial autocorrelation examples: Percent water in Wisconsin counties
+```{r,message=F,warning=F,fig.width=7,fig.height=4}
+# Load data
+perWater = read.csv('../Zoo955_WeeklyAssignments/Week6_WIwater_NLCD.csv',stringsAsFactors = F)
+# Counties data 
 library(rgdal)
-library(rgeos)
-
-
+counties = readOGR('../Lecture6_Overlays/Data/County_Boundaries_24K/County_Boundaries_24K.shp',layer='County_Boundaries_24K')
+# Add water to dataframe
+counties$water = perWater$perWater
 ```
+
+```{r,message=F,warning=F,fig.width=7,fig.height=5}
+# Because we're going to keep plotting counties, simplify data
+library(rgeos)
+cSimp <- gSimplify(counties, tol=5000, topologyPreserve=TRUE)
+plot(cSimp)
+# Get centroid coordinates and plot
+xy <- coordinates(counties)
+points(xy, cex=2, pch=20)
+```
+
+### Find adjacent polygons
+* Neighbors will typically be created from a spatial polygon file. 
+* Neighbors can be based on contiguity, distance, or the k nearest neighbors may be defined (other options as well).
+* To find adjacent polygons, use package `spdep`
+
+### Adjacent polygons 
+```{r,message=F,warning=F,fig.width=7,fig.height=5}
+library(spdep)
+# Construct neighbours list from polygon list
+w <- poly2nb(counties, row.names= counties$OBJECTID)
+class(w)
+summary(w)
+
+# Plot the links between the polygons
+plot(cSimp, main='Adjacent polygons')
+plot(w, xy, col='red4', add=TRUE, lwd=2)
+```
+
+### k-nearest neighbors 
+```{r,message=F,warning=F,fig.width=7,fig.height=5}
+par(mfrow=c(1,2),mar=c(0,0,0,0))
+# 4 neighbors
+k = knearneigh(xy, k = 3)
+k = knn2nb(k, row.names = counties$OBJECTID)
+plot(cSimp, main='k nearest neighbors = 4')
+plot(k, xy, col='red4', add=TRUE, lwd=2)
+
+# 2 neighbors
+k = knearneigh(xy, k = 2)
+k = knn2nb(k, row.names = counties$OBJECTID)
+plot(cSimp, main='k nearest neighbors = 2')
+plot(k, xy, col='red4', add=TRUE, lwd=2)
+```
+
+### Distance matrix 
+```{r,message=F,warning=F,fig.width=7,fig.height=5}
+par(mfrow=c(1,2),mar=c(0,0,0,0))
+# Distance = 50 km
+d =  dnearneigh(xy, d1 = 0, d2 = 50000, row.names = counties$OBJECTID)
+plot(cSimp, main='neighbors, distance = 50km')
+plot(d, xy, col='red4', add=TRUE, lwd=2)
+d =  dnearneigh(xy, d1 = 0, d2 = 100000, row.names = counties$OBJECTID)
+plot(cSimp, main='neighbors, distance = 100km')
+plot(d, xy, col='red4', add=TRUE, lwd=2)
+```
+
+### Homework
+
+1) Find an example of negative spatial autocorrelation in ecology 
