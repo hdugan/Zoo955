@@ -1,0 +1,139 @@
+---
+title: "Week 6"
+author: "Hilary Dugan"
+date: "3/13/2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## NLCD CODE ##
+
+```{r, eval=FALSE}
+library(sp)
+library(raster)
+library(rgdal)
+library(rgeos)
+
+counties = readOGR('../Lecture6_Overlays/Data/County_Boundaries_24K/County_Boundaries_24K.shp',
+                   layer='County_Boundaries_24K',stringsAsFactors = F)
+nlcd = raster('C:/Users/hdugan/Documents/NLCD/nlcd_2011_landcover_2011_edition_2014_10_10/nlcd_2011_landcover_2011_edition_2014_10_10.img')
+state = readOGR('C:/Users/hdugan/Dropbox/RandomR/GIS_Wisconsin/StateOutline/WI_state_outline.shp',layer='WI_state_outline')
+
+# Crop nlcd to state of Wisconsin
+state = spTransform(state,crs(nlcd))
+nlcdWI = crop(nlcd,state)
+
+nhd = readOGR('O:/DuganData/NHD2017/NHD_H_Wisconsin_Shape/Shape/NHDWaterbody.shp',layer='NHDWaterbody')
+nhd.proj = spTransform(nhd,crs(nlcd))
+
+################### NLCD ############################
+# You need the packages in the function 
+getWater <- function(countyID,counties,nlcd) {
+  library(sp)
+  library(raster)
+  library(rgdal)
+  library(rgeos)
+  library(dplyr)
+  county <- subset(counties,counties$OBJECTID==countyID)
+  county <-  spTransform(county,crs(nlcd))
+  county_nlcd <- crop(nlcd,county)
+
+  a <- extract(county_nlcd,county)
+  percent_water = round(100*length(a[[1]][a[[1]]==11])/length(a[[1]]),3)
+  return(percent_water)
+}
+```
+
+### Test function ####
+```{r eval=F}
+getWater("54",counties,nlcdWI) # Test to make sure function works
+```
+
+### Run in parallel ####
+```{r, eval=FALSE}
+# Create vector that will be used in the apply parallel call
+c = counties$OBJECTID
+
+#### RUN IN PARALLEL ####
+library(parallel)
+# Calculate the number of cores
+no_cores <- detectCores() - 1
+# Initiate cluster
+cl <- makeCluster(no_cores)
+# Call function, just testing first 7 counties
+output = parLapply(cl, c, getWater, counties = counties, nlcd = nlcdWI)
+# Stop cluster
+stopCluster(cl)
+
+# Write output
+pw = data.frame(counties = counties$COUNTY_NAM, perWater = unlist(output))
+write.csv(pw,'WIwater_NLCD.csv',row.names = F)
+```
+
+### NHD CODE ###
+```{r, eval=FALSE}
+################### NHD ############################
+# You need the packages in the function 
+getWaterNHD <- function(countyID,counties,nlcd) {
+  library(sp)
+  library(raster)
+  library(rgdal)
+  library(rgeos)
+  library(dplyr)
+  county <- subset(counties,counties$OBJECTID==countyID)
+  # Transform to NLCD CRS
+  county <-  spTransform(county,crs(nlcd))
+  county_nhd <- crop(nhd.proj,county)
+  
+  area_county = gArea(county)
+  area_nhd = gArea(county_nhd)
+  
+  percent_water = round(100*area_nhd/area_county,3)
+  return(percent_water)
+}
+
+getWaterNHD("2",counties,nlcdWI) # Test to make sure function works
+
+# Create vector that will be used in the apply parallel call
+c = counties$OBJECTID
+
+#### RUN IN PARALLEL ####
+library(parallel)
+# Calculate the number of cores
+no_cores <- detectCores() - 1
+# Initiate cluster
+cl <- makeCluster(no_cores)
+# Call function, just testing first 7 counties
+output = parLapply(cl, c, getWaterNHD, counties = counties, nlcd = nlcdWI)
+# Stop cluster
+stopCluster(cl)
+
+# Write output
+pw = data.frame(counties = counties$COUNTY_NAM, perWater = unlist(output))
+write.csv(pw,'WIwater_NLCD.csv',row.names = F)
+```
+
+
+```{r}
+a = read.csv('Week6_WIwater_NHD.csv',stringsAsFactors = F)
+b = read.csv('Week6_WIwater_NLCD.csv',stringsAsFactors = F)
+
+par(mar=c(3,3,1,1),mgp=c(1.5,0.5,0))
+plot(a$perWater,b$perWater,xlab = 'NHD % water',ylab='NLCD % water',pch=16,col=adjustcolor('red3',0.5))
+
+#### Counties data ####
+library(rgdal)
+library(viridisLite)
+counties = readOGR('../Lecture6_Overlays/Data/County_Boundaries_24K/County_Boundaries_24K.shp',layer='County_Boundaries_24K')
+
+counties$water = a$perWater
+pw = (1:4)[cut(a$perWater,breaks = c(0,2.5,5,10,25))]
+plot(counties,col = viridis(4)[pw])
+legend('topright',legend = c('0-2.5%','2.5-5%','5-10%','10-25%'), fill = viridis(4))
+```
+
