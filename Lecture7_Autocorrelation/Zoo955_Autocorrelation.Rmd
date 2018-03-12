@@ -1,0 +1,91 @@
+---
+title: "ZOO955 - Overlays"
+author: "Hilary Dugan"
+date: "3/13/2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### Tobler’s first law of geography ### 
+“Everything is related to everything else, but near things are more related than distant things”.
+
+#### References ####
+* http://rspatial.org/analysis/rst/3-spauto.html
+* http://www.bias-project.org.uk/ASDARcourse/unit6_slides.pdf
+* http://www.stat.purdue.edu/~bacraig/SCS/Spatial%20Correlation%20new.doc
+
+
+Detecting autocorrelation
+Describing and visualizing autocorrelation
+Adjusting for or predicting with autocorrelation
+
+
+### Spatial weights ###
+* Creating spatial weights is a necessary step in using areal
+data, perhaps just to check that there is no remaining spatial
+patterning in residuals
+* `spdep` package
+* The first step is to determine the sets of neighbours for each
+observation, the second to assign weights to each neighbour
+relationship
+
+### Weight Matrix ###
+
+
+To assess spatial autocorrelation, one first needs to define what is meant by two observations being close together, i.e., a distance measure must be determined.  These distances are presented in weight matrix, which defines the relationships between locations where measurements were made.  If data are collected at    locations, then the weight matrix will be  with zeroes on the diagonal.
+
+The weight matrix can be specified in many ways:
+
+"	The weight for any two different locations is a constant.
+"	All observations within a specified distance have a fixed weight.
+"	K nearest neighbors have a fixed weight, and all others are zero.
+"	Weight is proportional to inverse distance, inverse distance squared, or inverse distance up to a specified distance.
+
+Other weight matrices are possible.  The weight matrix is often row-standardized, i.e., all the weights in a row sum to one.  Note that the actual values in the weight matrix are up to the researcher.
+
+
+
+### Moran’s I ###
+Moran's I measures spatial autocorrelation based on both feature locations and feature values simultaneously. 
+Given a set of features and an associated attribute, it evaluates whether the pattern expressed is clustered, dispersed, or random. 
+
+Moran’s I is calculated as a ratio of the product of the variable of
+interest and its spatial lag, with the cross-product of the variable of
+interest, and adjusted for the spatial weights used:
+
+![](Figures/Moran.png) 
+
+where `yi` is the i-th observation, `¯y` is the mean of the variable of
+interest, and `wij` is the spatial weight of the link between `i` and `j`.
+Centering on the mean is equivalent to asserting that the correct
+model has a constant mean, and that any remaining patterning
+after centering is caused by the spatial relationships encoded in the
+spatial weights
+
+
+
+## Wy is it important? ##
+It invalidates most traditional statistical inference tests
+If SA exists, then the results of standard statistical inference tests  may be incorrect   (wrong!)
+We need to use spatial statistical inference tests               
+
+If Spatial Autocorrelation exists:
+Correlation coefficients appear to be bigger than they really are, and
+They are more likely to be found “statistically significant”
+
+#### Lake point data ####
+Read in lake point data from .csv 
+```{r,message=F,warning=F,fig.width=3,fig.height=3}
+library(sp)
+library(raster)
+library(rgdal)
+library(rgeos)
+
+
+```
