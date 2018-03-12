@@ -14,11 +14,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Tobler’s first law of geography ### 
 “Everything is related to everything else, but near things are more related than distant things”.
+Use autocorrelation as prediction (ie. interpolation!). Can ecology can beat the null model of autocorrelation?
 
 #### References ####
 * http://rspatial.org/analysis/rst/3-spauto.html
 * http://www.bias-project.org.uk/ASDARcourse/unit6_slides.pdf
 * http://www.stat.purdue.edu/~bacraig/SCS/Spatial%20Correlation%20new.doc
+* https://dynamicecology.wordpress.com/2013/10/02/autocorrelation-friend-or-foe/comment-page-1/
 
 
 Detecting autocorrelation
