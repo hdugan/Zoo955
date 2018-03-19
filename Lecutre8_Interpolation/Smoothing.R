@@ -214,8 +214,46 @@ t uses this calculation of spatial autocorrelation to determine the weights that
 
 
 library(gstat)
-gs <- gstat(formula=water~1, locations=countyPts)
+gs <- gstat(formula=forest~1, locations=countyPts)
 v <- variogram(gs, width=20)
 head(v)
 plot(v)
+
+The range parameter is given one third of the maximum value of object$dist. 
+The nugget value is given the mean value of the first three values of object$gamma. 
+The partial sill is given the mean of the last five values of object$gamma.
+fve <- fit.variogram(v, vgm(NA, "Exp", NA, NA))
+plot(v, fve)
+
+
+gs <- gstat(formula=forest~1, locations=countyPts, model=fve)
+k <- interpolate(r, gs)
+k <- mask(k, wi)
+plot(k)
+
+# predicted values
+kp <- predict(k, countyPts)
+## [using ordinary kriging]
+plot(kp)
+kr = rasterize(kp,)
+plot(kr$var1.pred)
+
+rmse.k <- rep(NA, 5)
+for (k in 1:5) {
+  test <- countyPts[kf == k, ]
+  train <- countyPts[kf != k, ]
+  gs <- gstat(formula=forest~1, locations=train, model=fve)
+  p <- predict(gs, test)
+  rmse.k[k] <- RMSE(test$forest, p$var1.pred)
+}
+
+rmse.k
+mean(rmse.idw)
+1 - (mean(rmse.idw) / null)
+
+kr = brick(kp)
+
+
+
+
 

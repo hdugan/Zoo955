@@ -2,7 +2,9 @@
 title: "Spatial Interpolation"
 author: "Hilary Dugan"
 date: "3/20/2018"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -17,6 +19,9 @@ Only interpolate where it makes sense!
 
 https://phys.org/news/2018-01-north-american-waterways-saltier-alkaline.html
 `r emo::ji("cry")`
+
+### References
+http://rspatial.org/analysis/rst/4-interpolation.html#inverse-distance-weighted
 
 ## Load spatial libraries
 ```{r, message = F}
@@ -348,7 +353,8 @@ legend('topright',legend = c('less forest','more forest'), fill = viridis(7)[c(1
 
 ```
 
-
+## Homework
+1) Use the file `Data/MendotaBathy.csv` to create a spatial interpolated map of Mendota bathymetry 
 
 
 
